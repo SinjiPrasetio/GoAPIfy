@@ -11,7 +11,7 @@ type Data struct {
 	ID uint
 }
 
-func User(c *gin.Context) {
+func CreateUser(c *gin.Context) {
 	var data Data
 	err := json.Unmarshal([]byte(`{"id":1}`), &data)
 	if err != nil {

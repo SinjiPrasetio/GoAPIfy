@@ -11,5 +11,5 @@ func API(server *gin.Engine) {
 	api := server.Group("/api/v1")
 
 	// Define your routes here.
-	api.POST("/test", user.User)
+	api.POST("/test", user.CreateUser)
 }
