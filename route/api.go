@@ -7,10 +7,9 @@ import (
 )
 
 func API(server *gin.Engine) {
-	// This is for your api base path, you can rename as you like.
+	// This is your API base path, you can rename it as you like.
 	api := server.Group("/api/v1")
 
-	// Define you route here
+	// Define your routes here.
 	api.POST("/test", user.User)
-
 }
