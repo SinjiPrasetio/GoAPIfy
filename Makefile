@@ -1,23 +1,30 @@
+# Load the environment variables from .env file
+include .env
+export
+
+ifeq ($(OS), Windows_NT)
+    RM = del /S /Q 
+else
+    RM = rm -Rf
+endif
+
+
 # Development server
 dev:
 	@echo "Running the development server..."
 	@go run main.go
 
 # Build server binary
-build:
-	@echo "Building the server..."
-	@if [ -z "$(APP_NAME)" ]; then \
-		$(EXPORT_CMD) $(grep -v '^#' .env | xargs) && \
-		go build -ldflags="-X 'main.AppName=$${APP_NAME}'" -o build/$${APP_NAME}; \
-	else \
-		go build -ldflags="-X 'main.AppName=$(APP_NAME)'" -o build/$(APP_NAME); \
-	fi
-	@echo "Build finished!"
+server:
+	@echo "Compiling the server..."
+	go build -o build/$(APP_NAME)
+	@echo "Server compiled successfully."
 
 # Run server binary
 run:
 	@echo "Running the server..."
-	@$(EXPORT_CMD) $(grep -v '^#' .env | xargs) && \
+	make clean
+	make server
 	./build/$(APP_NAME)
 
 # Start docker-compose
@@ -31,3 +38,12 @@ down:
 	@echo "Stopping docker-compose..."
 	docker-compose down
 	@echo "Docker-compose stopped!"
+
+clean:
+	@echo "Cleaning build..."
+	$(RM) build
+	@echo "Build is cleaned..."
+
+rename:
+	@echo "Renaming project..."
+	go mod edit -module $(APP_NAME)
