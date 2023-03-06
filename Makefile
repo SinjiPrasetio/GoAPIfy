@@ -10,12 +10,14 @@ endif
 
 MODULE_PATH = $(shell go list -m)
 
+install:
+	go mod tidy
 
 # Development server
 dev:
 	@echo "Running the development server..."
 	@go run main.go
-
+	
 # Build server binary
 server:
 	make clean
