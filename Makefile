@@ -50,5 +50,4 @@ clean:
 rename:
 	@echo "Renaming project..."
 	go mod edit -module $(APP_NAME)
-	go mod edit -replace Engine=./
 	go mod tidy

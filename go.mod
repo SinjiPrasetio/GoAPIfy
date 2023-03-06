@@ -1,7 +1,7 @@
-module GoAPIfy2
+module GoAPIfy
 
 go 1.19
 
-replace Engine => ./
+replace GoAPI => ./
 
-require Engine v0.0.0-00010101000000-000000000000
+require GoAPI v0.0.0-00010101000000-000000000000

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"Engine/database"
+	"GoAPI/database"
 	"fmt"
 )
 
