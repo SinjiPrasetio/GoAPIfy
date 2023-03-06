@@ -8,6 +8,8 @@ else
     RM = rm -Rf
 endif
 
+MODULE_PATH = $(shell go list -m)
+
 
 # Development server
 dev:
@@ -16,6 +18,7 @@ dev:
 
 # Build server binary
 server:
+	make clean
 	@echo "Compiling the server..."
 	go build -o build/$(APP_NAME)
 	@echo "Server compiled successfully."
@@ -47,3 +50,5 @@ clean:
 rename:
 	@echo "Renaming project..."
 	go mod edit -module $(APP_NAME)
+	go mod edit -replace Engine=./
+	go mod tidy

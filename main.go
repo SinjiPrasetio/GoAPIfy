@@ -1,7 +1,7 @@
 package main
 
 import (
-	"GoAPIfy/database"
+	"Engine/database"
 	"fmt"
 )
 
