@@ -1,7 +1,7 @@
 package main
 
 import (
-	database "GoAPIfy/database/migration"
+	"GoAPIfy/database"
 	"fmt"
 )
 
