@@ -1,0 +1,6 @@
+build/
+.env
+db-data/
+data.ms/
+public/
+
