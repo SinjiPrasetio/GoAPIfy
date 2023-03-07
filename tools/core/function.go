@@ -1,8 +1,8 @@
 package core
 
 import (
-	"GoAPI/tools/core/color"
 	"GoAPIfy/core/math"
+	"GoAPIfy/tools/core/color"
 	"fmt"
 	"io/ioutil"
 	"os"

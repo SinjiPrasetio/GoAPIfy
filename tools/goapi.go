@@ -6,7 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 
-	"GoAPI/tools/core/color"
+	"GoAPIfy/tools/core/color"
 
 	"github.com/joho/godotenv"
 )

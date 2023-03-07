@@ -1,9 +1,9 @@
 package main
 
 import (
-	"GoAPI/model"
 	"GoAPIfy/config"
 	"GoAPIfy/core/helper"
+	"GoAPIfy/model"
 	"GoAPIfy/route"
 	"fmt"
 	"log"
@@ -85,7 +85,7 @@ func main() {
 
 	// Define the API routes
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Defining routes..."))
-	route.API(server)
+	route.API(server, db)
 
 	// Serve static files from the public directory
 	server.Static("/storage", "./public")

@@ -1,7 +1,7 @@
 package user
 
 import (
-	"GoAPI/model"
+	"GoAPIfy/model"
 	"time"
 )
 

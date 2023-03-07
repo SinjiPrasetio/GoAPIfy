@@ -2,10 +2,7 @@ module GoAPIfy
 
 go 1.19
 
-replace GoAPI => ./
-
 require (
-	GoAPI v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-playground/validator/v10 v10.11.2

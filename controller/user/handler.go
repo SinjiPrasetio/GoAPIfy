@@ -1,24 +1,18 @@
 package user
 
 import (
-	"encoding/json"
-	"net/http"
+	"GoAPIfy/model"
 
 	"github.com/gin-gonic/gin"
 )
 
-type Data struct {
-	ID uint
+type userHandler struct {
+	modelService model.Model
 }
 
-func CreateUser(c *gin.Context) {
-	var data Data
-	err := json.Unmarshal([]byte(`{"id":1}`), &data)
-	if err != nil {
-		errorMessage := gin.H{"errors": err}
-		c.JSON(http.StatusUnprocessableEntity, errorMessage)
-		return
-	}
+func NewUserHandler(modelService model.Model) *userHandler {
+	return &userHandler{modelService}
+}
 
-	c.JSON(http.StatusOK, data.ID)
+func (h *userHandler) CreateUser(c *gin.Context) {
 }

@@ -8,14 +8,19 @@ import (
 
 // Model is the interface that must be implemented by models
 type Model interface {
-	Create(data interface{})
+	Create(data interface{}) (interface{}, error)
 	FindByID(id uint) (interface{}, error)
-	FindByKey(key string, value interface{})
+	FindByKey(key string, value interface{}) (interface{}, error)
 }
 
 // Model is the concrete type that implements the Model interface
 type model struct {
 	db *gorm.DB
+}
+
+// NewModel creates a new instance of the model type with the specified database connection
+func NewModel(db *gorm.DB) *model {
+	return &model{db}
 }
 
 // AutoMigration automatically migrates the models to the database schema
@@ -24,11 +29,6 @@ func AutoMigration(db *gorm.DB) error {
 		&User{},
 	)
 	return err
-}
-
-// NewModel creates a new instance of the model type with the specified database connection
-func NewModel(db *gorm.DB) *model {
-	return &model{db}
 }
 
 // Create creates a new model with the specified data
