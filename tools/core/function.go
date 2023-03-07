@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -100,4 +101,45 @@ func KeyGenerate() {
 
 func ProductionCheck() {
 
+}
+
+func Rename(oldName string, newName string) {
+	rootDir := "."
+
+	err := filepath.Walk(rootDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Only consider .go files
+		if !strings.HasSuffix(info.Name(), ".go") {
+			return nil
+		}
+
+		// Read file contents
+		fileBytes, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+
+		// Replace oldName with newName
+		newContents := strings.ReplaceAll(string(fileBytes), oldName, newName)
+
+		// Write new contents back to file
+		err = ioutil.WriteFile(path, []byte(newContents), 0644)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Replaced '%s' with '%s' in file '%s'\n", oldName, newName, path)
+
+		return nil
+	})
+
+	if err != nil {
+		fmt.Printf("Error: %s\n", err)
+		return
+	}
+
+	fmt.Printf("Successfully replaced '%s' with '%s' in all .go files.\n", oldName, newName)
 }

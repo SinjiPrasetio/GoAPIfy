@@ -16,6 +16,11 @@ const envFilePath = ".env"
 func main() {
 	// Get argument from the command line.
 	args1 := os.Args[1]
+	args2 := os.Args[2]
+	args3 := os.Args[3]
+	fmt.Println(args1)
+	fmt.Println(args2)
+	fmt.Println(args3)
 
 	// Load .env file
 	err := godotenv.Load()
@@ -58,5 +63,9 @@ func main() {
 
 	if args1 == "production" {
 		core.ProductionCheck()
+	}
+
+	if args1 == "rename" {
+		core.Rename(args2, args3)
 	}
 }

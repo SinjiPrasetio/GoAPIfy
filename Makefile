@@ -66,6 +66,7 @@ clean:
 # Update the module name to the value of APP_NAME variable in the .env file
 rename:
 	@echo "Renaming project..."
+	go run tools/goapi.go rename $(shell go list -m) $(APP_NAME)
 	go mod edit -module $(APP_NAME)
 	go mod tidy
 
