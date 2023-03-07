@@ -1,25 +1,18 @@
-package main
+package core
 
 import (
-	"GoAPIfy/tools/core"
+	"GoAPI/tools/core/color"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"GoAPI/tools/core/color"
-
 	"github.com/joho/godotenv"
 )
 
-const envFilePath = ".env"
-
-func main() {
-	// Get argument from the command line.
-	args1 := os.Args[1]
-
+// LoadEnvironment loads the .env file and prompts the user to restore from .env.example if it is corrupted.
+func LoadEnvironment() {
 	// Load .env file
 	err := godotenv.Load()
-
 	if err != nil {
 		// Prompt user to restore .env file from example
 		fmt.Println(color.Colorize(color.Red, "Failed to load .env file."))
@@ -46,17 +39,9 @@ func main() {
 				fmt.Println(color.Colorize(color.Red, "Failed to load environment variables."))
 				os.Exit(0)
 			}
-			fmt.Println(color.Colorize(color.Green, ".env file has been restocolor.red from .env.example."))
+			fmt.Println(color.Colorize(color.Green, ".env file has been restored from .env.example."))
 		} else {
 			os.Exit(0)
 		}
-	}
-
-	if args1 == "key" {
-		core.KeyGenerate()
-	}
-
-	if args1 == "production" {
-		core.ProductionCheck()
 	}
 }

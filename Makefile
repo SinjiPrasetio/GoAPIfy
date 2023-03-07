@@ -9,11 +9,21 @@ else
     RM = rm -Rf
 endif
 
+.PHONY: key
+
 # Get the path of the current module
 MODULE_PATH = $(shell go list -m)
 
 # Update the module dependencies and install any missing modules
 install:
+	@echo "Checking for .env file..."
+	@if exist .env ( \
+        echo ".env file found." \
+    ) else ( \
+        echo ".env file not found. Copying from .env.example..." \
+        && copy .env.example .env \
+    )
+	make key
 	go mod tidy
 
 # Run the development server
@@ -58,3 +68,6 @@ rename:
 	@echo "Renaming project..."
 	go mod edit -module $(APP_NAME)
 	go mod tidy
+
+key:
+	go run tools/goapi.go key

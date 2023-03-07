@@ -10,7 +10,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${APP_KEY:-password}
       MYSQL_DATABASE: ${DATABASE_NAME:-goapify}
-      MYSQL_USER: ${DATABASET_USER:-goapify}
+      MYSQL_USER: ${DATABASET_PASSWORD:-password}
       MYSQL_PASSWORD: ${DATABASET_PASSWORD:-password}
     env_file:
       - .env
@@ -22,8 +22,8 @@ services:
     restart: always
     environment:
       PMA_HOST: mariadb
-      PMA_USER: ${DATABASET_USER:-goapify}
-      PMA_PASSWORD: ${DATABASET_PASSWORD:-password}
+      PMA_USER: root
+      PMA_PASSWORD: ${APP_KEY:-password}
     ports:
       - "8090:80"
 
