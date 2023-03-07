@@ -97,3 +97,7 @@ func KeyGenerate() {
 	fmt.Println(color.Colorize(color.Green, fmt.Sprintf("Key generated. Key: %s", key)))
 	os.Exit(0)
 }
+
+func ProductionCheck() {
+
+}

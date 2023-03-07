@@ -15,5 +15,5 @@ const (
 
 // Colorize formats a string with the specified color
 func ColorizeCmd(color string, text string) string {
-	return fmt.Sprintf(color, text, Black)
+	return fmt.Sprintf(color, text)
 }
