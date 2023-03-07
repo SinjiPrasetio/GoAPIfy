@@ -83,9 +83,12 @@ func main() {
 	// Automatically migrate the models to the database schema
 	model.AutoMigration(db)
 
+	// Loading modelService
+	modelService := model.NewModel(db)
+
 	// Define the API routes
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Defining routes..."))
-	route.API(server, db)
+	route.API(server, modelService)
 
 	// Serve static files from the public directory
 	server.Static("/storage", "./public")

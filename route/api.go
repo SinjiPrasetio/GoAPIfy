@@ -5,12 +5,9 @@ import (
 	"GoAPIfy/model"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func API(server *gin.Engine, db *gorm.DB) {
-	// Loading modelService
-	modelService := model.NewModel(db)
+func API(server *gin.Engine, modelService model.Model) {
 
 	//Define your handler here...
 	userHandler := user.NewUserHandler(modelService)
