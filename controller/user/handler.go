@@ -15,4 +15,5 @@ func NewUserHandler(modelService model.Model) *userHandler {
 }
 
 func (h *userHandler) CreateUser(c *gin.Context) {
+
 }
