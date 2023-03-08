@@ -4,8 +4,6 @@
 package core
 
 import (
-	"errors"
-
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -39,27 +37,6 @@ func FormatResponse(message string, code int, status string, data interface{}) R
 	return jsonResponse
 }
 
-// FormatValidationErrors extracts error messages from a validator.ValidationErrors object and returns them in a slice
-// err: an error object to be processed
-// returns a slice of error messages extracted from the validator.ValidationErrors object
-func FormatValidationErrors(err error) []string {
-	var errorMessages []string
-	var validationErrors validator.ValidationErrors
-
-	// Check if the error is of type validator.ValidationErrors
-	if errors.As(err, &validationErrors) {
-		// If so, loop through each error in the object and append its error message to the slice
-		for _, e := range err.(validator.ValidationErrors) {
-			errorMessages = append(errorMessages, e.Error())
-		}
-	} else {
-		// If not, simply append the error message to the slice
-		errorMessages = append(errorMessages, err.Error())
-	}
-
-	return errorMessages
-}
-
 // GiveResponse is a utility function that takes in a Gin context object, an HTTP status code, and an interface type representing the response data.
 // The function uses the FormatResponse function to create a formatted response object with the provided status code and message.
 // The response data is included in the response object as the value of the "data" key.
@@ -76,4 +53,28 @@ func GiveResponse(c *gin.Context, status int, response interface{}) {
 	c.JSON(status, data)
 
 	return
+}
+
+// FormatError takes in an error object and returns a Gin H object with an "errors" key containing a slice of error messages.
+// If the error object is a validator.ValidationErrors object, it will extract the error messages from each error in the object.
+// If the error object is not a validator.ValidationErrors object, it will simply return a Gin H object with a single error message.
+// err: the error object to be processed
+// returns a Gin H object with an "errors" key containing a slice of error messages
+func FormatError(err error) gin.H {
+	// Create a slice to hold error messages
+	var errors []string
+
+	// Use type assertion to check if the error is a validator.ValidationErrors object
+	if validationErrors, ok := err.(validator.ValidationErrors); ok {
+		// If it is, loop through each error in the object and append its error message to the errors slice
+		for _, e := range validationErrors {
+			errors = append(errors, e.Error())
+		}
+	} else {
+		// If it's not a validator.ValidationErrors object, simply append the error message to the errors slice
+		errors = append(errors, err.Error())
+	}
+
+	// Create a Gin H object with an "errors" key containing the errors slice
+	return gin.H{"errors": errors}
 }

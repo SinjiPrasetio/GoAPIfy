@@ -33,10 +33,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 	err := c.ShouldBindJSON(&input)
 
 	if err != nil {
-		errors := core.FormatValidationErrors(err)
-
-		errorMessage := gin.H{"errors": errors}
-
+		errorMessage := core.FormatError(err)
 		core.GiveResponse(c, http.StatusUnprocessableEntity, errorMessage)
 		return
 	}
