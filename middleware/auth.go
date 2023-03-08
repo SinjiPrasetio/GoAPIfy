@@ -46,7 +46,8 @@ func Authentication(authService auth.Service, modelService model.Model) gin.Hand
 
 		userID := uint(claim["id"].(float64))
 
-		result, err := modelService.FindByID(userID)
+		var userModel model.User
+		result, err := modelService.FindByID(userID, userModel)
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : user is unauthorized!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
@@ -56,6 +57,7 @@ func Authentication(authService auth.Service, modelService model.Model) gin.Hand
 		if !ok {
 			errorMessage := core.FormatError(errors.New("access denied : user data corrupted!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
 		}
 
 		c.Set("currentUser", userData)

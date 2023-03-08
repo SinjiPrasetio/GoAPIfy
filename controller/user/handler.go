@@ -7,6 +7,7 @@ import (
 	"GoAPIfy/model"
 	"GoAPIfy/service/auth"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -64,19 +65,25 @@ func (h *UserHandler) Login(c *gin.Context) {
 	password := input.Password
 
 	var userModel model.User
-	// Check if the email and password are valid
-	result, err := h.modelService.FindByKey("email", email, userModel)
+	result, err := h.modelService.FindByKey("email", email, &userModel)
 	if err != nil {
 		// handle error
-		errorMessage := core.FormatError(err)
-		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 	}
 
-	userData, ok := result.(model.User)
+	fmt.Printf("Type of result before type assertion: %T\n", result)
+
+	userData, ok := result.(*model.User)
+	if !ok {
+		fmt.Printf("Type assertion failed. Type of result after type assertion: %T\n", result)
+		// handle type assertion error
+	}
+
+	fmt.Printf("Type of result after type assertion: %T\n", userData)
 	if !ok {
 		// handle type assertion error
 		errorMessage := core.FormatError(errors.New("model not compactible"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
 	}
 
 	if userData.Email != email {
@@ -95,9 +102,9 @@ func (h *UserHandler) Login(c *gin.Context) {
 	// Create a JWT token
 	// You would typically include more information in the token, such as the user ID or other user details
 	// For the sake of this example, we'll just create a token with the email as the payload
-	jwt, err := h.authService.GenerateToken(userData)
+	jwt, err := h.authService.GenerateToken(*userData)
 
-	response := UserWithTokenFormatter(userData, jwt)
+	response := UserWithTokenFormatter(*userData, jwt)
 
 	// Send a success response with the JWT token
 	core.SendResponse(c, http.StatusOK, response)

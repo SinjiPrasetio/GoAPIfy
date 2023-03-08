@@ -20,7 +20,7 @@ func AutoMigration(db *gorm.DB) error {
 // It defines the common methods that will be used across different models.
 type Model interface {
 	Create(data interface{}) (interface{}, error)
-	FindByID(id uint) (interface{}, error)
+	FindByID(id uint, model interface{}) (interface{}, error)
 	FindByKey(key string, value string, model interface{}) (interface{}, error)
 	Update(data interface{}) (interface{}, error)
 	Delete(data interface{}) (interface{}, error)
@@ -48,8 +48,7 @@ func (m *model) Create(data interface{}) (interface{}, error) {
 // FindByID searches for a model with the specified ID and returns it.
 // It takes in a pointer to the model object, the ID to search for, and returns the found data and an error, if any.
 // If the data is found, the function returns the data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) FindByID(id uint) (interface{}, error) {
-	var model interface{}
+func (m *model) FindByID(id uint, model interface{}) (interface{}, error) {
 	err := m.db.First(model, id).Error
 	return model, err
 }
@@ -59,7 +58,7 @@ func (m *model) FindByID(id uint) (interface{}, error) {
 // The function returns the found data and an error, if any. If the data is found, it is stored in the model and returned with a nil error.
 // If an error occurs, it returns an error object with the corresponding error message.
 func (m *model) FindByKey(key string, value string, model interface{}) (interface{}, error) {
-	err := m.db.Where(fmt.Sprintf("%s = ?", key), value).Find(&model).Error
+	err := m.db.Where(fmt.Sprintf("%s = ?", key), value).Find(model).Error
 	return model, err
 }
 
@@ -67,7 +66,7 @@ func (m *model) FindByKey(key string, value string, model interface{}) (interfac
 // It takes in a pointer to the model object and the data to be updated, and returns the updated data and an error, if any.
 // If the update is successful, the function returns the updated data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
 func (m *model) Update(data interface{}) (interface{}, error) {
-	err := m.db.Save(&data).Error
+	err := m.db.Save(data).Error
 	return data, err
 }
 
@@ -75,6 +74,6 @@ func (m *model) Update(data interface{}) (interface{}, error) {
 // It takes in a pointer to the model object and the data to be deleted, and returns the deleted data and an error, if any.
 // If the deletion is successful, the function returns the deleted data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
 func (m *model) Delete(data interface{}) (interface{}, error) {
-	err := m.db.Delete(&data).Error
+	err := m.db.Delete(data).Error
 	return data, err
 }
