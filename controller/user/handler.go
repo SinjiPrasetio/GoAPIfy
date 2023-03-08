@@ -8,15 +8,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	modelService model.Model
 }
 
-func NewUserHandler(modelService model.Model) *userHandler {
-	return &userHandler{modelService}
+func NewUserHandler(modelService model.Model) *UserHandler {
+	return &UserHandler{modelService}
 }
 
-func (h *userHandler) CreateUser(c *gin.Context) {
+func (h *UserHandler) CreateUser(c *gin.Context) {
 	var input RegisterInput
 	err := c.ShouldBindJSON(&input)
 

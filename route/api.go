@@ -1,7 +1,7 @@
 package route
 
 import (
-	"GoAPIfy/controller/user"
+	"GoAPIfy/controller"
 	"GoAPIfy/model"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +9,13 @@ import (
 
 func API(server *gin.Engine, modelService model.Model) {
 
-	//Define your handler here...
-	userHandler := user.NewUserHandler(modelService)
+	// Register all the handlers
+	h := controller.RegisterHandler(modelService)
 
 	// This is your API base path, you can rename it as you like.
 	api := server.Group("/api/v1")
 
 	// Define your routes here.
-	api.POST("/test", userHandler.CreateUser)
+	api.POST("/test", h.UserHandler.CreateUser)
+	// Add more routes as needed
 }
