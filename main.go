@@ -5,6 +5,7 @@ import (
 	"GoAPIfy/core/helper"
 	"GoAPIfy/model"
 	"GoAPIfy/route"
+	"GoAPIfy/seeder"
 	"fmt"
 	"log"
 	"os"
@@ -85,6 +86,8 @@ func main() {
 
 	// Loading modelService
 	modelService := model.NewModel(db)
+
+	seeder.RegisterSeeders(modelService)
 
 	// Define the API routes
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Defining routes..."))

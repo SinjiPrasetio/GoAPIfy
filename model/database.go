@@ -24,6 +24,7 @@ type Model interface {
 	FindByKey(key string, value string, model interface{}) (interface{}, error)
 	Update(data interface{}) (interface{}, error)
 	Delete(data interface{}) (interface{}, error)
+	Count(data interface{}) (int, error)
 }
 
 // model is the concrete type that implements the Model interface.
@@ -76,4 +77,13 @@ func (m *model) Update(data interface{}) (interface{}, error) {
 func (m *model) Delete(data interface{}) (interface{}, error) {
 	err := m.db.Delete(data).Error
 	return data, err
+}
+
+// Count counts the number of records that match the specified data.
+// It takes in a pointer to the model object and the data to be counted, and returns the count and an error, if any.
+// If the count is successful, the function returns the count with a nil error. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Count(data interface{}) (int, error) {
+	var count int64
+	err := m.db.Model(data).Count(&count).Error
+	return int(count), err
 }
