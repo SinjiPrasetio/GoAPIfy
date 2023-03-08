@@ -32,15 +32,60 @@ func NewUserHandler(modelService model.Model, authService auth.AuthService) *Use
 // It takes a *gin.Context as input and expects the request body to be in JSON format.
 // It returns an error response if the input data is invalid or incomplete, or a success
 // response if the user is successfully created in the database.
-func (h *UserHandler) Create(c *gin.Context) {
+func (h *UserHandler) Register(c *gin.Context) {
+	// Parse the request body and bind it to a RegisterInput struct
 	var input RegisterInput
 	err := c.ShouldBindJSON(&input)
 	if err != nil {
+		// If the request body is invalid or incomplete, send an error response
 		errorMessage := core.FormatError(err)
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 		return
 	}
-	// Create user in the database and return success response
+
+	// Check that the password and confirmation password match
+	if input.Password != input.CPassword {
+		errorMessage := core.FormatError(errors.New("passwords do not match"))
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
+	}
+
+	// Hash the password
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	if err != nil {
+		errorMessage := core.FormatError(errors.New("failed to hash password"))
+		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
+		return
+	}
+
+	// Create a new User instance with the input data and hashed password
+	user := &model.User{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: string(hashedPassword),
+	}
+
+	// Create the user in the database
+	_, err = h.modelService.Create(user)
+	if err != nil {
+		errorMessage := core.FormatError(errors.New("failed to create user"))
+		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
+		return
+	}
+
+	// Generate a JWT token using the user data
+	jwt, err := h.authService.GenerateToken(*user)
+	if err != nil {
+		errorMessage := core.FormatError(errors.New("failed to generate token"))
+		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
+		return
+	}
+
+	// Format the user data and token into a response object
+	response := UserWithTokenFormatter(*user, jwt)
+
+	// Send a success response with the response object
+	core.SendResponse(c, http.StatusOK, response)
 }
 
 // Login is a method for handling POST requests related to user login.

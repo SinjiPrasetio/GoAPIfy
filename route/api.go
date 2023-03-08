@@ -21,7 +21,7 @@ func API(server *gin.Engine, modelService model.Model) {
 	userGroup := api.Group("/user")
 
 	// Define your routes here.
-	userGroup.POST("/register", h.UserHandler.Create)
+	userGroup.POST("/register", h.UserHandler.Register)
 	userGroup.POST("/login", h.UserHandler.Login)
 
 	userModGroup := userGroup.Group("/edit")
