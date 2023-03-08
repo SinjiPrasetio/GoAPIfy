@@ -18,13 +18,13 @@ import (
 // CRUD operations on user data.
 type UserHandler struct {
 	modelService model.Model
-	authService  auth.Service
+	authService  auth.AuthService
 }
 
 // NewUserHandler creates a new UserHandler instance and returns a pointer to it.
 // It takes a model.Model as input, which is used to interact with the database and perform
 // CRUD operations on user data.
-func NewUserHandler(modelService model.Model, authService auth.Service) *UserHandler {
+func NewUserHandler(modelService model.Model, authService auth.AuthService) *UserHandler {
 	return &UserHandler{modelService, authService}
 }
 

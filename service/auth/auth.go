@@ -1,55 +1,76 @@
 package auth
 
 import (
-	"GoAPIfy/model"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
+
+	"GoAPIfy/model"
 )
 
-type Service interface {
+// AuthService is an interface for handling JWT token generation and validation.
+type AuthService interface {
 	GenerateToken(user model.User) (string, error)
-	ValidateToken(token string) (*jwt.Token, error)
+	ValidateToken(tokenString string) (*jwt.Token, error)
 }
 
-type jwtService struct {
+// JWTService is a concrete implementation of the AuthService interface.
+type JWTService struct {
+	SigningKey []byte
 }
 
-func NewService() *jwtService {
-	return &jwtService{}
+// NewJWTService creates a new instance of the JWTService.
+func NewJWTService() *JWTService {
+	return &JWTService{
+		SigningKey: []byte(os.Getenv("APP_KEY")),
+	}
 }
 
-func (s *jwtService) GenerateToken(user model.User) (string, error) {
-	claim := jwt.MapClaims{}
-	claim["id"] = user.ID
-	claim["email"] = user.Email
-	claim["name"] = user.Name
+// GenerateToken generates a JWT token based on user data.
+func (s *JWTService) GenerateToken(user model.User) (string, error) {
+	// Create a new JWT token with a UUID as the unique identifier (jti)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"jti":    uuid.New().String(),
+		"sub":    user.ID,
+		"name":   user.Name,
+		"email":  user.Email,
+		"exp":    time.Now().Add(time.Hour * 24).Unix(), // Expires in 24 hours
+		"iss":    "GoAPIfy",
+		"aud":    "GoAPIfy",
+		"nbf":    time.Now().Unix(),
+		"iat":    time.Now().Unix(),
+		"scopes": []string{"user"},
+	})
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
-
-	signedToken, err := token.SignedString([]byte(os.Getenv("APP_KEY")))
+	// Sign the token with the app key
+	signedToken, err := token.SignedString(s.SigningKey)
 	if err != nil {
-		return signedToken, err
+		return "", err
 	}
 
 	return signedToken, nil
 }
 
-func (s *jwtService) ValidateToken(token string) (*jwt.Token, error) {
-	verify, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-
-		if !ok {
-			return nil, errors.New("Invalid token.")
+// ValidateToken validates a JWT token and returns the parsed token.
+func (s *JWTService) ValidateToken(tokenString string) (*jwt.Token, error) {
+	// Parse the JWT token and validate the signature
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("Invalid token signing method")
 		}
-
-		return []byte(os.Getenv("APP_KEY")), nil
+		return s.SigningKey, nil
 	})
 
 	if err != nil {
-		return verify, err
+		return nil, err
 	}
 
-	return verify, nil
+	if _, ok := token.Claims.(jwt.Claims); !ok && !token.Valid {
+		return nil, errors.New("Token is invalid")
+	}
+
+	return token, nil
 }

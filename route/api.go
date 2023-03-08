@@ -10,7 +10,7 @@ import (
 )
 
 func API(server *gin.Engine, modelService model.Model) {
-	authService := auth.NewService()
+	authService := auth.NewJWTService()
 
 	// Register all the handlers
 	h := controller.RegisterHandler(modelService, authService)

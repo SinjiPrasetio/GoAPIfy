@@ -12,7 +12,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-func Authentication(authService auth.Service, modelService model.Model) gin.HandlerFunc {
+func Authentication(authService auth.AuthService, modelService model.Model) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
