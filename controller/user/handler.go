@@ -34,7 +34,7 @@ func (h *UserHandler) CreateUser(c *gin.Context) {
 
 	if err != nil {
 		errorMessage := core.FormatError(err)
-		core.GiveResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 		return
 	}
 	// Create user in the database and return success response

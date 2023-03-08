@@ -4,6 +4,8 @@
 package core
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 )
@@ -37,7 +39,7 @@ func FormatResponse(message string, code int, status string, data interface{}) R
 	return jsonResponse
 }
 
-// GiveResponse is a utility function that takes in a Gin context object, an HTTP status code, and an interface type representing the response data.
+// SendResponse is a utility function that takes in a Gin context object, an HTTP status code, and an interface type representing the response data.
 // The function uses the FormatResponse function to create a formatted response object with the provided status code and message.
 // The response data is included in the response object as the value of the "data" key.
 // Finally, the function sends the response object back to the client using the JSON method provided by the Gin framework.
@@ -45,14 +47,15 @@ func FormatResponse(message string, code int, status string, data interface{}) R
 // status: HTTP status code to be included in the response
 // response: interface{} representing the data to be included in the response
 // returns nothing, but sends a formatted response object back to the client using the JSON method provided by the Gin framework
-func GiveResponse(c *gin.Context, status int, response interface{}) {
+func SendResponse(c *gin.Context, status int, response interface{}) {
+	// Determine the status string based on the provided status code
+	statusString := http.StatusText(status)
+
 	// Create a formatted response object using the provided message, status code, and response data
-	data := FormatResponse("Failed to register", status, "error", response)
+	data := FormatResponse(statusString, status, statusString, response)
 
 	// Send the formatted response object back to the client using the JSON method provided by the Gin framework
 	c.JSON(status, data)
-
-	return
 }
 
 // FormatError takes in an error object and returns a Gin H object with an "errors" key containing a slice of error messages.
