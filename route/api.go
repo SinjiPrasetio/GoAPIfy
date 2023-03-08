@@ -2,6 +2,7 @@ package route
 
 import (
 	"GoAPIfy/controller"
+	"GoAPIfy/middleware"
 	"GoAPIfy/model"
 	"GoAPIfy/service/auth"
 
@@ -17,8 +18,14 @@ func API(server *gin.Engine, modelService model.Model) {
 	// This is your API base path, you can rename it as you like.
 	api := server.Group("/api/v1")
 
+	userGroup := api.Group("/user")
+
 	// Define your routes here.
-	api.POST("/user/create", h.UserHandler.Create)
-	api.POST("/user/login", h.UserHandler.Login)
+	userGroup.POST("/register", h.UserHandler.Create)
+	userGroup.POST("/login", h.UserHandler.Login)
+
+	userModGroup := userGroup.Group("/edit")
+
+	userModGroup.Use(middleware.Authentication(authService, modelService))
 	// Add more routes as needed
 }
