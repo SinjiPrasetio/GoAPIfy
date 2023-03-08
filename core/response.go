@@ -1,3 +1,6 @@
+// Package core provides utility functions and data structures that are commonly used across the GoAPIfy application.
+// It contains functions for handling HTTP responses, formatting JSON responses, and extracting error messages from validator.ValidationErrors objects.
+// It also includes the Response and Meta data structures, which are used to represent the structure of JSON responses.
 package core
 
 import (
@@ -21,6 +24,11 @@ type Meta struct {
 }
 
 // FormatResponse creates a formatted Response struct for the JSON response
+// message: string message to be included in the response
+// code: HTTP status code to be included in the response
+// status: string indicating success or failure status of the response
+// data: interface{} representing the data to be included in the response
+// returns a formatted Response struct with the provided message, code, status, and data
 func FormatResponse(message string, code int, status string, data interface{}) Response {
 	// Create a new Meta struct with the given message, code, and status
 	jsonMeta := Meta{Message: message, Code: code, Status: status}
@@ -32,6 +40,8 @@ func FormatResponse(message string, code int, status string, data interface{}) R
 }
 
 // FormatValidationErrors extracts error messages from a validator.ValidationErrors object and returns them in a slice
+// err: an error object to be processed
+// returns a slice of error messages extracted from the validator.ValidationErrors object
 func FormatValidationErrors(err error) []string {
 	var errorMessages []string
 	var validationErrors validator.ValidationErrors
@@ -54,7 +64,10 @@ func FormatValidationErrors(err error) []string {
 // The function uses the FormatResponse function to create a formatted response object with the provided status code and message.
 // The response data is included in the response object as the value of the "data" key.
 // Finally, the function sends the response object back to the client using the JSON method provided by the Gin framework.
-
+// c: a Gin context object
+// status: HTTP status code to be included in the response
+// response: interface{} representing the data to be included in the response
+// returns nothing, but sends a formatted response object back to the client using the JSON method provided by the Gin framework
 func GiveResponse(c *gin.Context, status int, response interface{}) {
 	// Create a formatted response object using the provided message, status code, and response data
 	data := FormatResponse("Failed to register", status, "error", response)

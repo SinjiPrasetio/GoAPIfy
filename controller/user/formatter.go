@@ -1,3 +1,6 @@
+// Package user defines the user controller for the application. The user controller handles incoming
+// requests related to user data, and is responsible for converting user model data to JSON format
+// for use in the user interface.
 package user
 
 import (
@@ -5,6 +8,8 @@ import (
 	"time"
 )
 
+// UserFormat defines the format in which user data is returned to the user interface.
+// It contains the user's ID, name, email, verified_at timestamp, creation timestamp, and update timestamp.
 type UserFormat struct {
 	ID         uint       `json:"id"`
 	Name       string     `json:"name"`
@@ -14,6 +19,9 @@ type UserFormat struct {
 	UpdatedAt  time.Time  `json:"updated_at"`
 }
 
+// UserFormatter is a utility function used to convert a user model to the UserFormat struct.
+// It takes a user model as input and returns a UserFormat struct containing
+// the user's data in the desired format.
 func UserFormatter(user model.User) UserFormat {
 	return UserFormat{
 		ID:         user.ID,
@@ -25,6 +33,10 @@ func UserFormatter(user model.User) UserFormat {
 	}
 }
 
+// UserCollectionFormatter is a utility function used to convert a slice of user models to a
+// slice of UserFormat structs.
+// It takes a slice of user models as input and returns a slice of UserFormat structs,
+// each containing the data for one user in the desired format.
 func UserCollectionFormatter(users []model.User) []UserFormat {
 	var values []UserFormat
 	for _, user := range users {

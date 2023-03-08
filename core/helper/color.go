@@ -1,7 +1,9 @@
+// Package helper provides utility functions that can be used across the application.
 package helper
 
 import "fmt"
 
+// Color constants represent ANSI escape codes for various colors.
 const (
 	Black   = "\033[1;30m%s\033[0m"
 	Red     = "\033[1;31m%s\033[0m"
@@ -13,7 +15,9 @@ const (
 	White   = "\033[1;37m%s\033[0m"
 )
 
-// Colorize formats a string with the specified color
+// ColorizeCmd returns a string with the specified color applied.
+// It takes a color constant and a string as input, and returns a formatted string
+// with the specified color applied.
 func ColorizeCmd(color string, text string) string {
 	return fmt.Sprintf(color, text)
 }
