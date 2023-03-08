@@ -7,7 +7,6 @@ import (
 	"GoAPIfy/model"
 	"GoAPIfy/service/auth"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -60,38 +59,37 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Validate user credentials and generate a JWT token
-	email := input.Email
-	password := input.Password
+	email := input.Email       // Get the email from the input data
+	password := input.Password // Get the password from the input data
 
+	// Retrieve the user data from the database using the email address as the key
 	var userModel model.User
 	result, err := h.modelService.FindByKey("email", email, &userModel)
 	if err != nil {
-		// handle error
+		// If there is an error retrieving the user data, send an error response
+		// Note: this assumes that the FindByKey method returns an error when the key is not found in the database
+		errorMessage := core.FormatError(err)
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
 	}
 
-	fmt.Printf("Type of result before type assertion: %T\n", result)
-
+	// Type assert the result to a pointer to a User model
 	userData, ok := result.(*model.User)
 	if !ok {
-		fmt.Printf("Type assertion failed. Type of result after type assertion: %T\n", result)
-		// handle type assertion error
-	}
-
-	fmt.Printf("Type of result after type assertion: %T\n", userData)
-	if !ok {
-		// handle type assertion error
+		// If the type assertion fails, send an error response
 		errorMessage := core.FormatError(errors.New("model not compactible"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 		return
 	}
 
+	// Check that the email in the retrieved user data matches the email provided in the login input
 	if userData.Email != email {
 		errorMessage := core.FormatError(errors.New("email not match"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 		return
 	}
 
+	// Check that the password provided in the login input matches the password in the retrieved user data
 	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(password))
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("password not match"))
@@ -99,13 +97,12 @@ func (h *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	// Create a JWT token
-	// You would typically include more information in the token, such as the user ID or other user details
-	// For the sake of this example, we'll just create a token with the email as the payload
+	// Generate a JWT token using the user data
 	jwt, err := h.authService.GenerateToken(*userData)
 
+	// Format the user data and token into a response object
 	response := UserWithTokenFormatter(*userData, jwt)
 
-	// Send a success response with the JWT token
+	// Send a success response with the response object
 	core.SendResponse(c, http.StatusOK, response)
 }
