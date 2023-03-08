@@ -15,13 +15,11 @@ const envFilePath = ".env"
 
 func main() {
 	// Get argument from the command line.
-	args1 := os.Args[1]
-	args2 := os.Args[2]
-	args3 := os.Args[3]
-	fmt.Println(args1)
-	fmt.Println(args2)
-	fmt.Println(args3)
-
+	args := os.Args
+	if len(args) == 0 {
+		fmt.Println(color.Colorize(color.Red, "No command input, please use make help to view commands."))
+		os.Exit(0)
+	}
 	// Load .env file
 	err := godotenv.Load()
 
@@ -57,15 +55,19 @@ func main() {
 		}
 	}
 
-	if args1 == "key" {
+	if args[1] == "key" {
 		core.KeyGenerate()
 	}
 
-	if args1 == "production" {
+	if args[1] == "production" {
 		core.ProductionCheck()
 	}
 
-	if args1 == "rename" {
-		core.Rename(args2, args3)
+	if args[1] == "rename" {
+		if len(args) != 4 {
+			fmt.Println(color.Colorize(color.Red, "Not enough arguments."))
+			os.Exit(0)
+		}
+		core.Rename(args[2], args[3])
 	}
 }

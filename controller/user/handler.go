@@ -5,9 +5,12 @@ package user
 import (
 	"GoAPIfy/core"
 	"GoAPIfy/model"
+	"GoAPIfy/service/auth"
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // UserHandler is a struct containing methods for handling user-related requests.
@@ -15,13 +18,14 @@ import (
 // CRUD operations on user data.
 type UserHandler struct {
 	modelService model.Model
+	authService  auth.Service
 }
 
 // NewUserHandler creates a new UserHandler instance and returns a pointer to it.
 // It takes a model.Model as input, which is used to interact with the database and perform
 // CRUD operations on user data.
-func NewUserHandler(modelService model.Model) *UserHandler {
-	return &UserHandler{modelService}
+func NewUserHandler(modelService model.Model, authService auth.Service) *UserHandler {
+	return &UserHandler{modelService, authService}
 }
 
 // CreateUser is a method for handling POST requests related to creating new users.
@@ -56,6 +60,45 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	// Validate user credentials and generate a JWT token
-	// If the credentials are invalid, send an unauthorized response
-	// If the credentials are valid, send a success response with the JWT token
+	email := input.Email
+	password := input.Password
+
+	var userModel model.User
+	// Check if the email and password are valid
+	result, err := h.modelService.FindByKey("email", email, userModel)
+	if err != nil {
+		// handle error
+		errorMessage := core.FormatError(err)
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+	}
+
+	userData, ok := result.(model.User)
+	if !ok {
+		// handle type assertion error
+		errorMessage := core.FormatError(errors.New("model not compactible"))
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+	}
+
+	if userData.Email != email {
+		errorMessage := core.FormatError(errors.New("email not match"))
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(password))
+	if err != nil {
+		errorMessage := core.FormatError(errors.New("password not match"))
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
+	}
+
+	// Create a JWT token
+	// You would typically include more information in the token, such as the user ID or other user details
+	// For the sake of this example, we'll just create a token with the email as the payload
+	jwt, err := h.authService.GenerateToken(userData)
+
+	response := UserWithTokenFormatter(userData, jwt)
+
+	// Send a success response with the JWT token
+	core.SendResponse(c, http.StatusOK, response)
 }
