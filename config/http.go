@@ -1,4 +1,4 @@
-// Package config defines application configuration settings.
+// Package config provides configuration options for the application.
 package config
 
 // AllowOriginConfig returns a slice of strings representing the URLs allowed to make

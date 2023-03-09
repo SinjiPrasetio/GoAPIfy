@@ -106,6 +106,9 @@ github.com/pelletier/go-toml/v2/internal/characters
 github.com/pelletier/go-toml/v2/internal/danger
 github.com/pelletier/go-toml/v2/internal/tracker
 github.com/pelletier/go-toml/v2/unstable
+# github.com/pkg/errors v0.9.1
+## explicit
+github.com/pkg/errors
 # github.com/twitchyliquid64/golang-asm v0.15.1
 ## explicit; go 1.13
 github.com/twitchyliquid64/golang-asm/asm/arch
@@ -128,26 +131,33 @@ github.com/twitchyliquid64/golang-asm/unsafeheader
 # github.com/ugorji/go/codec v1.2.9
 ## explicit; go 1.11
 github.com/ugorji/go/codec
+# github.com/ulule/limiter/v3 v3.11.1
+## explicit; go 1.17
+github.com/ulule/limiter/v3
+github.com/ulule/limiter/v3/drivers/middleware/gin
+github.com/ulule/limiter/v3/drivers/store/common
+github.com/ulule/limiter/v3/drivers/store/memory
+github.com/ulule/limiter/v3/internal/bytebuffer
 # golang.org/x/arch v0.0.0-20210923205945-b76863e36670
 ## explicit; go 1.17
 golang.org/x/arch/x86/x86asm
-# golang.org/x/crypto v0.5.0
+# golang.org/x/crypto v0.7.0
 ## explicit; go 1.17
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
 golang.org/x/crypto/sha3
-# golang.org/x/net v0.7.0
+# golang.org/x/net v0.8.0
 ## explicit; go 1.17
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
 golang.org/x/net/http2/h2c
 golang.org/x/net/http2/hpack
 golang.org/x/net/idna
-# golang.org/x/sys v0.5.0
+# golang.org/x/sys v0.6.0
 ## explicit; go 1.17
 golang.org/x/sys/cpu
 golang.org/x/sys/unix
-# golang.org/x/text v0.7.0
+# golang.org/x/text v0.8.0
 ## explicit; go 1.17
 golang.org/x/text/internal/language
 golang.org/x/text/internal/language/compact
