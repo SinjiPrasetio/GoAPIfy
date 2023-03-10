@@ -3,11 +3,11 @@
 package route
 
 import (
-	"Laravel/controller"
-	"Laravel/middleware"
-	"Laravel/model"
-	"Laravel/rate"
-	"Laravel/service/auth"
+	"GoAPIfy/controller"
+	"GoAPIfy/middleware"
+	"GoAPIfy/model"
+	"GoAPIfy/rate"
+	"GoAPIfy/service/auth"
 
 	"github.com/gin-gonic/gin"
 	ginmiddleware "github.com/ulule/limiter/v3/drivers/middleware/gin"

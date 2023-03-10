@@ -2,7 +2,7 @@
 package rate
 
 import (
-	"Laravel/config"
+	"GoAPIfy/config"
 
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/store/memory"

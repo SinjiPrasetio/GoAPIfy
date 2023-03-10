@@ -1,8 +1,8 @@
 package seeder
 
 import (
-	"Laravel/factory"
-	"Laravel/model"
+	"GoAPIfy/factory"
+	"GoAPIfy/model"
 )
 
 type UserSeeder struct {

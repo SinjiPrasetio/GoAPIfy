@@ -8,7 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/google/uuid"
 
-	"Laravel/model"
+	"GoAPIfy/model"
 )
 
 // AuthService defines the interface for generating and validating JWT tokens.

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"Laravel/tools/core"
+	"GoAPIfy/tools/core"
 	"fmt"
 	"io/ioutil"
 	"os"
 
-	"Laravel/tools/core/color"
+	"GoAPIfy/tools/core/color"
 
 	"github.com/joho/godotenv"
 )
