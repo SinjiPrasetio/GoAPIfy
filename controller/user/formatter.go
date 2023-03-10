@@ -4,7 +4,7 @@
 package user
 
 import (
-	"GoAPIfy/model"
+	"Laravel/model"
 	"time"
 )
 

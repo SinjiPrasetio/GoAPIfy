@@ -1,7 +1,7 @@
 package core
 
 import (
-	"GoAPIfy/tools/core/color"
+	"Laravel/tools/core/color"
 	"fmt"
 	"io/ioutil"
 	"os"

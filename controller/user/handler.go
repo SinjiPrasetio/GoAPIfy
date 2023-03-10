@@ -3,9 +3,9 @@
 package user
 
 import (
-	"GoAPIfy/core"
-	"GoAPIfy/model"
-	"GoAPIfy/service/auth"
+	"Laravel/core"
+	"Laravel/model"
+	"Laravel/service/auth"
 	"errors"
 	"net/http"
 

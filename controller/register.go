@@ -3,9 +3,9 @@
 package controller
 
 import (
-	"GoAPIfy/controller/user"
-	"GoAPIfy/model"
-	"GoAPIfy/service/auth"
+	"Laravel/controller/user"
+	"Laravel/model"
+	"Laravel/service/auth"
 )
 
 // Handlers defines a struct containing all the application's handlers, each of which

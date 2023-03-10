@@ -1,4 +1,4 @@
-module GoAPIfy
+module Laravel
 
 go 1.19
 

@@ -1,7 +1,7 @@
 package factory
 
 import (
-	"GoAPIfy/model"
+	"Laravel/model"
 
 	"github.com/bxcodec/faker/v3"
 	"golang.org/x/crypto/bcrypt"

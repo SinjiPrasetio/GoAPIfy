@@ -1,11 +1,11 @@
 package main
 
 import (
-	"GoAPIfy/config"
-	"GoAPIfy/core/helper"
-	"GoAPIfy/model"
-	"GoAPIfy/route"
-	"GoAPIfy/seeder"
+	"Laravel/config"
+	"Laravel/core/helper"
+	"Laravel/model"
+	"Laravel/route"
+	"Laravel/seeder"
 	"fmt"
 	"log"
 	"os"
