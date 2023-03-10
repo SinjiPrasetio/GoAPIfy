@@ -17,12 +17,6 @@ MODULE_PATH = $(shell go list -m)
 # Update the module dependencies and install any missing modules
 install:
 	@echo "Checking for .env file..."
-	@if exist .env ( \
-        echo ".env file found." \
-    ) else ( \
-        echo ".env file not found. Copying from .env.example..." \
-        && copy .env.example .env \
-    )
 	make key
 	go mod tidy
 
