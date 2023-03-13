@@ -65,10 +65,11 @@ func Delete(filename string, directory string) error {
 	return nil
 }
 
-const (
-	TemporaryFileExpiration = 24 * time.Hour
-)
+// TemporaryFileExpiration is the duration after which a temporary file is considered expired.
+const TemporaryFileExpiration = 24 * time.Hour
 
+// CreateTemporaryFile creates a temporary file with the specified data and filename, and returns its URL.
+// The file is automatically deleted after TemporaryFileExpiration.
 func CreateTemporaryFile(data []byte, filename string) (string, error) {
 	// Generate a UUID for the temporary file name
 	uuid, err := uuid.NewRandom()
@@ -97,6 +98,10 @@ func CreateTemporaryFile(data []byte, filename string) (string, error) {
 	return GetTemporaryFileURL(temporaryFilename), nil
 }
 
+// GetTemporaryFileURL generates a URL for a temporary file based on the filename provided.
+// It determines the protocol (http or https) based on the APP_PRODUCTION environment variable,
+// and gets the domain name from the APP_DOMAIN environment variable.
+// It then constructs and returns the URL using the generated protocol, domain name and filename.
 func GetTemporaryFileURL(filename string) string {
 	// Get the protocol based on the production environment
 	protocol := "http"
@@ -109,4 +114,5 @@ func GetTemporaryFileURL(filename string) string {
 
 	// Construct the URL for the temporary file
 	return fmt.Sprintf("%s://%s/public/temporary/%s", protocol, domain, filename)
+
 }

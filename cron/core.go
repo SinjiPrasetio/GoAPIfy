@@ -43,6 +43,18 @@ const (
 	TemporaryFileExpiration = 24 * time.Hour
 )
 
+// DeleteExpiredTemporaryFiles deletes any temporary files in the specified directory that have expired based on the
+// `TemporaryFileExpiration` duration constant.
+//
+// This function iterates over the files in the specified directory and deletes any regular files that were last
+// modified more than `TemporaryFileExpiration` ago. It prints a message to the console for each file that is deleted or
+// for any errors that occur.
+//
+// Parameters:
+//   - None
+//
+// Returns:
+//   - None
 func DeleteExpiredTemporaryFiles() {
 	// Construct the path for the temporary directory
 	temporaryDirectory := filepath.Join("public", "temporary")

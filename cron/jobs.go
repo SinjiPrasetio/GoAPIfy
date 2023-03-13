@@ -21,9 +21,9 @@ func (c *cron) Start() {
 	job := cronJob.New()
 
 	// Core function. IMPORTANT: DO NOT CHANGE THIS
-	// Start -----
+	// Start --------------------------------------
 	job.AddFunc("*/5 * * * *", DeleteExpiredTemporaryFiles)
-	// End -----
+	// End ----------------------------------------
 
 	// Schedule a function to be executed once a day
 	job.AddFunc("@daily", func() {
