@@ -12,6 +12,11 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
+// Authentication is a middleware that handles JWT token validation and user authentication.
+// It extracts the JWT token from the "Authorization" header and validates it using the provided auth service.
+// If the token is valid, it extracts the user ID from the token claims and fetches the corresponding user data
+// from the model service. If the user data is valid, it sets it in the context for downstream handlers to access.
+// If any errors occur during validation, it returns a 401 Unauthorized response with an error message.
 func Authentication(authService auth.AuthService, modelService model.Model) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
