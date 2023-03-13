@@ -4,9 +4,11 @@ import (
 	"GoAPIfy/config"
 	"GoAPIfy/core/helper"
 	"GoAPIfy/core/service"
+	"GoAPIfy/cron"
 	"GoAPIfy/model"
 	"GoAPIfy/route"
 	"GoAPIfy/seeder"
+	"GoAPIfy/service/appService"
 	"fmt"
 	"log"
 	"os"
@@ -16,6 +18,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"github.com/meilisearch/meilisearch-go"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -40,6 +43,14 @@ func main() {
 	if err != nil {
 		log.Fatal(helper.ColorizeCmd(helper.Green, "Error converting APP_PRODUCTION to boolean."))
 	}
+
+	// Connecting to Meilisearch Server and initialize
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Connecting to Meilisearch..."))
+	meilisearchClient := meilisearch.NewClient(meilisearch.ClientConfig{
+		Host:   "http://127.0.0.1:7700",
+		APIKey: os.Getenv("MEILI_MASTER_KEY"),
+	})
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Meilisearch initialized..."))
 
 	// Print a message to indicate that the web server is being deployed
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Deploying Web Server..."))
@@ -87,6 +98,13 @@ func main() {
 
 	// Loading modelService
 	modelService := model.NewModel(db)
+
+	appService := appService.AppService{Model: modelService, MeiliSearch: meilisearchClient}
+
+	//
+	fmt.Println(helper.ColorizeCmd(helper.Magenta, "Initialize Cron Jobs"))
+	cron := cron.NewCron(appService)
+	cron.Start()
 
 	seeder.RegisterSeeders(modelService)
 
