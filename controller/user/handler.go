@@ -5,6 +5,7 @@ package user
 import (
 	"GoAPIfy/core"
 	"GoAPIfy/model"
+	"GoAPIfy/service/appService"
 	"GoAPIfy/service/auth"
 	"errors"
 	"net/http"
@@ -17,15 +18,15 @@ import (
 // It takes a model.Model as input, which is used to interact with the database and perform
 // CRUD operations on user data.
 type UserHandler struct {
-	modelService model.Model
-	authService  auth.AuthService
+	s           appService.AppService
+	authService auth.AuthService
 }
 
 // NewUserHandler creates a new UserHandler instance and returns a pointer to it.
 // It takes a model.Model as input, which is used to interact with the database and perform
 // CRUD operations on user data.
-func NewUserHandler(modelService model.Model, authService auth.AuthService) *UserHandler {
-	return &UserHandler{modelService, authService}
+func NewUserHandler(s appService.AppService, authService auth.AuthService) *UserHandler {
+	return &UserHandler{s, authService}
 }
 
 // CreateUser is a method for handling POST requests related to creating new users.
@@ -66,7 +67,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	// Create the user in the database
-	_, err = h.modelService.Create(user)
+	_, err = h.s.Model.Create(user)
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to create user"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
@@ -109,7 +110,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	// Retrieve the user data from the database using the email address as the key
 	var userModel model.User
-	result, err := h.modelService.FindByKey("email", email, &userModel)
+	result, err := h.s.Model.FindByKey("email", email, &userModel)
 	if err != nil {
 		// If there is an error retrieving the user data, send an error response
 		// Note: this assumes that the FindByKey method returns an error when the key is not found in the database

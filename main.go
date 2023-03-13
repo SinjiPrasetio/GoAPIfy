@@ -106,11 +106,11 @@ func main() {
 	cron := cron.NewCron(appService)
 	cron.Start()
 
-	seeder.RegisterSeeders(modelService)
+	seeder.RegisterSeeders(appService)
 
 	// Define the API routes
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Defining routes..."))
-	route.API(server, modelService)
+	route.API(server, appService)
 
 	// Serve static files from the public directory
 	server.Static("/storage", "./public")

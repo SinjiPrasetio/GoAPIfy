@@ -3,6 +3,7 @@ package middleware
 import (
 	"GoAPIfy/core"
 	"GoAPIfy/model"
+	"GoAPIfy/service/appService"
 	"GoAPIfy/service/auth"
 	"errors"
 	"net/http"
@@ -17,7 +18,7 @@ import (
 // If the token is valid, it extracts the user ID from the token claims and fetches the corresponding user data
 // from the model service. If the user data is valid, it sets it in the context for downstream handlers to access.
 // If any errors occur during validation, it returns a 401 Unauthorized response with an error message.
-func Authentication(authService auth.AuthService, modelService model.Model) gin.HandlerFunc {
+func Authentication(authService auth.AuthService, s appService.AppService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
@@ -52,7 +53,7 @@ func Authentication(authService auth.AuthService, modelService model.Model) gin.
 		userID := uint(claim["id"].(float64))
 
 		var userModel model.User
-		result, err := modelService.FindByID(userID, userModel)
+		result, err := s.Model.FindByID(userID, userModel)
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : user is unauthorized!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)

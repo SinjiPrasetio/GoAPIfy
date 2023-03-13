@@ -4,7 +4,7 @@ package controller
 
 import (
 	"GoAPIfy/controller/user"
-	"GoAPIfy/model"
+	"GoAPIfy/service/appService"
 	"GoAPIfy/service/auth"
 )
 
@@ -18,9 +18,9 @@ type Handlers struct {
 // RegisterHandler initializes and returns a struct containing all the application's handlers.
 // It takes a model.Model as input, which is used to initialize each of the handlers.
 // Returns a pointer to the Handlers struct.
-func RegisterHandler(modelService model.Model, authService auth.AuthService) *Handlers {
+func RegisterHandler(s appService.AppService, authService auth.AuthService) *Handlers {
 	return &Handlers{
-		UserHandler: user.NewUserHandler(modelService, authService),
+		UserHandler: user.NewUserHandler(s, authService),
 		// Initialize other handlers as needed
 	}
 }
