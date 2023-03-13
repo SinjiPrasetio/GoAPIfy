@@ -2,9 +2,13 @@
 package file
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 // Save : saves a file to the specified directory with a filename and contents.
@@ -59,4 +63,50 @@ func Delete(filename string, directory string) error {
 	}
 
 	return nil
+}
+
+const (
+	TemporaryFileExpiration = 24 * time.Hour
+)
+
+func CreateTemporaryFile(data []byte, filename string) (string, error) {
+	// Generate a UUID for the temporary file name
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		return "", err
+	}
+	temporaryFilename := uuid.String() + "_" + filename
+
+	// Construct the path for the temporary file
+	temporaryDirectory := filepath.Join("public", "temporary")
+	temporaryPath := filepath.Join(temporaryDirectory, temporaryFilename)
+
+	// Create the temporary directory if it doesn't exist
+	err = os.MkdirAll(temporaryDirectory, 0755)
+	if err != nil {
+		return "", err
+	}
+
+	// Write the file contents to disk
+	err = ioutil.WriteFile(temporaryPath, data, 0644)
+	if err != nil {
+		return "", err
+	}
+
+	// Return the URL for the temporary file
+	return GetTemporaryFileURL(temporaryFilename), nil
+}
+
+func GetTemporaryFileURL(filename string) string {
+	// Get the protocol based on the production environment
+	protocol := "http"
+	if os.Getenv("APP_PRODUCTION") == "true" {
+		protocol = "https"
+	}
+
+	// Get the domain name from the environment variable
+	domain := os.Getenv("APP_DOMAIN")
+
+	// Construct the URL for the temporary file
+	return fmt.Sprintf("%s://%s/public/temporary/%s", protocol, domain, filename)
 }
