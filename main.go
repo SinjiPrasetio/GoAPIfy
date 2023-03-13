@@ -3,6 +3,7 @@ package main
 import (
 	"GoAPIfy/config"
 	"GoAPIfy/core/helper"
+	"GoAPIfy/core/service"
 	"GoAPIfy/model"
 	"GoAPIfy/route"
 	"GoAPIfy/seeder"
@@ -95,6 +96,11 @@ func main() {
 
 	// Serve static files from the public directory
 	server.Static("/storage", "./public")
+
+	// Register a handler function for the "/websocket/service" endpoint of the server
+	fmt.Println("Initiating Websocket Route")
+	server.GET("/websocket/service", service.WSHandler)
+	fmt.Println("Websocket Deployed!")
 
 	// Print a message to indicate that the web server is starting
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Starting Web Server..."))
