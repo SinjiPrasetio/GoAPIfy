@@ -98,7 +98,7 @@ func main() {
 
 	appService := appService.AppService{Model: modelService, MeiliSearch: meilisearchClient, Redis: redisClient}
 
-	//
+	// Initialize Cron Jobs
 	fmt.Println(helper.ColorizeCmd(helper.Magenta, "Initialize Cron Jobs"))
 	cron := cron.NewCron(appService)
 	cron.Start()
