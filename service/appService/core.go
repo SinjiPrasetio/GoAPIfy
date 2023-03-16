@@ -11,6 +11,7 @@ package appService
 import (
 	"GoAPIfy/model"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/meilisearch/meilisearch-go"
 )
 
@@ -25,4 +26,5 @@ import (
 type AppService struct {
 	Model       model.Model
 	MeiliSearch *meilisearch.Client
+	Redis       *redis.Client
 }

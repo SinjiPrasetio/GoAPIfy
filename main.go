@@ -2,6 +2,7 @@ package main
 
 import (
 	"GoAPIfy/config"
+	"GoAPIfy/core/database"
 	"GoAPIfy/core/helper"
 	"GoAPIfy/core/service"
 	"GoAPIfy/cron"
@@ -19,9 +20,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 	"github.com/meilisearch/meilisearch-go"
-	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func main() {
@@ -32,12 +31,8 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Get the database configuration from the environment variables
-	dbName := os.Getenv("DATABASE_NAME")
-	dbHost := os.Getenv("DATABASE_HOST")
-	dbPort := os.Getenv("DATABASE_PORT")
-	dbUser := os.Getenv("DATABASE_USER")
-	dbPass := os.Getenv("DATABASE_PASS")
+	// Get the configuration from the environment variables
+	databaseType := os.Getenv("DATABASE_TYPE")
 	productionStr := os.Getenv("APP_PRODUCTION")
 	production, err := strconv.ParseBool(productionStr)
 	if err != nil {
@@ -74,21 +69,23 @@ func main() {
 	// Print a message to indicate that the server is connecting to the database
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Connect to database..."))
 
-	// Create a Data Source Name (DSN) for the database connection
-	dsn := dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8mb4&parseTime=True&loc=Local&net_write_timeout=6000"
-
-	// Open a connection to the database with the specified DSN and configuration
-	var loggerOption = &gorm.Config{}
-	// If the APP_PRODUCTION environment variable is not set to true,
-	// open a connection to the database with GORM, using the provided DSN
-	// and logger settings
-	if !production {
-		loggerOption = &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		}
+	var db *gorm.DB
+	switch databaseType {
+	case "mysql", "mariadb":
+		db, err = database.InitMysql(production)
+	case "postgres", "postgresql":
+		db, err = database.InitPostgres(production)
+	case "sqlite":
+		db, err = database.InitSQLite(production)
+	case "mssql", "sqlserver":
+		db, err = database.InitMSSQL(production)
+	default:
+		log.Fatal("DATABASE_TYPE is not supported. Make sure you have configure your database correctly.")
 	}
 
-	db, err := gorm.Open(mysql.Open(dsn), loggerOption)
+	// Initialize Redis client
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Connecting to Redis (if enabled)..."))
+	redisClient := database.InitRedis()
 
 	// Print a message to indicate that the models are being migrated
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Migrating models..."))
@@ -99,7 +96,7 @@ func main() {
 	// Loading modelService
 	modelService := model.NewModel(db)
 
-	appService := appService.AppService{Model: modelService, MeiliSearch: meilisearchClient}
+	appService := appService.AppService{Model: modelService, MeiliSearch: meilisearchClient, Redis: redisClient}
 
 	//
 	fmt.Println(helper.ColorizeCmd(helper.Magenta, "Initialize Cron Jobs"))
