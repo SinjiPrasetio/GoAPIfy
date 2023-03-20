@@ -63,6 +63,7 @@ func main() {
 	}
 
 	if args[1] == "key" {
+		core.PrintLogo()
 		core.KeyGenerate()
 	}
 
@@ -115,6 +116,7 @@ func main() {
 	}
 
 	if args[1] == "dev" {
+		core.PrintLogo()
 		fmt.Println(color.Colorize(color.Green, "Starting Server..."))
 		cmd := exec.Command("go", "run", "main.go")
 		cmd.Stdout = os.Stdout
