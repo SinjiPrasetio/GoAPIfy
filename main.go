@@ -10,6 +10,7 @@ import (
 	"GoAPIfy/route"
 	"GoAPIfy/seeder"
 	"GoAPIfy/service/appService"
+	logo "GoAPIfy/tools/core"
 	"fmt"
 	"log"
 	"os"
@@ -24,7 +25,7 @@ import (
 )
 
 func main() {
-
+	logo.PrintLogo()
 	// Load the environment variables from the .env file
 	err := godotenv.Load()
 	if err != nil {

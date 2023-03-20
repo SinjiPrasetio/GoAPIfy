@@ -3,7 +3,6 @@ version: '3'
 services:
   #  start MariaDB, and ensure that data is stored to a mounted volume
   mariadb:
-    container_name: mariadb_${APP_NAME:-GoAPIfy}
     image: 'mariadb:10.6'
     ports:
       - "3306:3306"
@@ -11,7 +10,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${APP_KEY:-password}
       MYSQL_DATABASE: ${DATABASE_NAME:-goapify}
-      MYSQL_USER: ${DATABASET_USER:-goapify}
+      MYSQL_USER: ${DATABASET_PASSWORD:-password}
       MYSQL_PASSWORD: ${DATABASET_PASSWORD:-password}
     env_file:
       - .env
@@ -19,18 +18,17 @@ services:
       - ./db-data/mariadb:/docker-entrypoint-initdb.d
 
   phpmyadmin:
-    container_name: phpmyadmin_${APP_NAME:-GoAPIfy}
     image: phpmyadmin/phpmyadmin:latest
     restart: always
     environment:
       PMA_HOST: mariadb
-      PMA_USER: ${DATABASET_USER:-goapify}
-      PMA_PASSWORD: ${DATABASET_PASSWORD:-password}
+      PMA_USER: root
+      PMA_PASSWORD: ${APP_KEY:-password}
     ports:
       - "8090:80"
 
   meilisearch:
-    container_name: meilisearch_${APP_NAME:-GoAPIfy}
+    container_name: meilisearch
     image: getmeili/meilisearch:v0.29
     environment:
       - http_proxy

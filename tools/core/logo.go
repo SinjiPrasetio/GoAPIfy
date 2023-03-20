@@ -6,6 +6,7 @@ import (
 )
 
 func PrintLogo() {
+	ClearConsole()
 	fmt.Println(color.Colorize(color.Cyan, "   _____               _____ _____  __       "))
 	fmt.Println(color.Colorize(color.Cyan, "  / ____|        /\\   |  __ \\_   _|/ _|      "))
 	fmt.Println(color.Colorize(color.Cyan, " | |  __  ___   /  \\  | |__) || | | |_ _   _ "))

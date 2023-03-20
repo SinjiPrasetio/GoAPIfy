@@ -26,6 +26,14 @@ func FileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+func FolderExists(path string) bool {
+	info, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return info.IsDir()
+}
+
 // SaveFile saves a file to the specified path.
 // It takes in an io.Reader object representing the source file, and a string representing the destination file path.
 // If the directory for the destination file does not exist, the function creates it.

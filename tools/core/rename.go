@@ -1,15 +1,28 @@
 package core
 
 import (
+	"GoAPIfy/tools/core/color"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
-func Rename(oldName string, newName string) {
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
+func Rename() {
+	PrintLogo()
+	cmd := exec.Command("go", "list", "-m")
+	output, err := cmd.Output()
+
+	oldName := strings.TrimSpace(string(output))
+	newName := os.Getenv("APP_NAME")
+	if oldName == newName {
+		fmt.Println(color.Colorize(color.Red, "The APP_NAME and the project name is the same, nothing would be done."))
+		os.Exit(1)
+	}
+	fmt.Println(color.Colorize(color.Magenta, fmt.Sprintf("Renaming project from %s to %s!", oldName, newName)))
+	err = filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -26,14 +39,12 @@ func Rename(oldName string, newName string) {
 					if err != nil {
 						return err
 					}
-					fmt.Printf("%s has been replaced with %s in file %s\n", oldName, newName, path)
 				} else if strings.Contains(content, fmt.Sprintf(` "%s"`, oldName)) {
 					newContent := strings.ReplaceAll(content, fmt.Sprintf(` "%s"`, oldName), fmt.Sprintf(` "%s"`, newName))
 					err = ioutil.WriteFile(path, []byte(newContent), 0644)
 					if err != nil {
 						return err
 					}
-					fmt.Printf("%s has been replaced with %s in file %s\n", oldName, newName, path)
 				}
 			}
 		}
@@ -43,4 +54,5 @@ func Rename(oldName string, newName string) {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+	fmt.Println(color.Colorize(color.Magenta, fmt.Sprintf("Successfully renamed the project from %s to %s!", oldName, newName)))
 }
