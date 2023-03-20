@@ -27,7 +27,7 @@ type Model interface {
 	Delete() error
 	Load(model interface{}) *model
 	Count() (int64, error)
-	With(relation string) error
+	With(relation string) *model
 }
 
 // model is the concrete type that implements the Model interface.
