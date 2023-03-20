@@ -179,34 +179,3 @@ func (m *model) With(relation string) *model {
 	m.db = m.db.Preload(relation)
 	return m
 }
-
-// Chunk retrieves records from the database in batches of the specified size,
-// and processes each batch using the provided callback function.
-// It takes in the size of each batch, and a callback function that processes the records in each batch.
-// The callback function takes a slice of the model type and returns an error, if any.
-// If the retrieval and processing of all batches is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Chunk(batchSize int, callback func(records []interface{}) error) error {
-	var lastID uint
-	for {
-		// Retrieve the next batch of records from the database
-		var records []interface{}
-		if err := m.db.Where("id > ?", lastID).Limit(batchSize).Find(&records).Error; err != nil {
-			return err
-		}
-		if len(records) == 0 {
-			break // No more records left to retrieve
-		}
-
-		// Call the callback function with the current batch of records
-		if err := callback(records); err != nil {
-			return err
-		}
-
-		// Update the last ID to the last ID of the current batch
-		lastRecord := records[len(records)-1]
-		lastIDField := m.db.Statement.Schema.LookUpField("ID")
-		lastID = uint(lastIDField.ValueOf(lastRecord).Uint())
-	}
-
-	return nil
-}
