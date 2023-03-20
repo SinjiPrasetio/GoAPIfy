@@ -1,8 +1,8 @@
 package ${controllerPackage}
 
 import (
-	"GoAPIfy/service/appService"
-	"GoAPIfy/service/auth"
+	"${AppName}/service/appService"
+	"${AppName}/service/auth"
 )
 
 type ${controllerName}Handler struct {

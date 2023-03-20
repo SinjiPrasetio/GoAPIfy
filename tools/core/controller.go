@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -32,6 +33,10 @@ func Controller(p string) {
 }
 
 func CreateHandler(p string, controllerName string) {
+	cmd := exec.Command("go", "list", "-m")
+	output, err := cmd.Output()
+
+	appName := strings.TrimSpace(string(output))
 	src, err := os.Open("./tools/templates/controller/handler.txt")
 	if err != nil {
 		fmt.Println(color.Colorize(color.Red, "GoAPIfy is corrupted, core files is missing!"))
@@ -45,6 +50,7 @@ func CreateHandler(p string, controllerName string) {
 
 	modifiedBytes := []byte(strings.ReplaceAll(string(srcByte), "${controllerName}", controllerName))
 	modifiedBytes = []byte(strings.ReplaceAll(string(modifiedBytes), "${controllerPackage}", p))
+	modifiedBytes = []byte(strings.ReplaceAll(string(modifiedBytes), "${AppName}", appName))
 
 	out, err := os.Create(fmt.Sprintf("./controller/%s/handler.go", p))
 	if err != nil {
@@ -62,6 +68,10 @@ func CreateHandler(p string, controllerName string) {
 }
 
 func CreateFormatter(p string, controllerName string) {
+	cmd := exec.Command("go", "list", "-m")
+	output, err := cmd.Output()
+
+	appName := strings.TrimSpace(string(output))
 	src, err := os.Open("./tools/templates/controller/formatter.txt")
 	if err != nil {
 		fmt.Println(color.Colorize(color.Red, "GoAPIfy is corrupted, core files is missing!"))
@@ -75,6 +85,7 @@ func CreateFormatter(p string, controllerName string) {
 
 	modifiedBytes := []byte(strings.ReplaceAll(string(srcByte), "${controllerName}", controllerName))
 	modifiedBytes = []byte(strings.ReplaceAll(string(modifiedBytes), "${controllerPackage}", p))
+	modifiedBytes = []byte(strings.ReplaceAll(string(modifiedBytes), "${AppName}", appName))
 
 	out, err := os.Create(fmt.Sprintf("./controller/%s/formatter.go", p))
 	if err != nil {
