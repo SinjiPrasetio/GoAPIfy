@@ -20,6 +20,7 @@ func main() {
 		fmt.Println(color.Colorize(color.Red, "No command input, please use make help to view commands."))
 		os.Exit(0)
 	}
+
 	// Load .env file
 	err := godotenv.Load()
 
