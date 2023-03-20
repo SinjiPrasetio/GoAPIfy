@@ -1,14 +1,7 @@
 package core
 
 import (
-	"GoAPIfy/core/math"
-	"GoAPIfy/core/stringable"
-	"GoAPIfy/tools/core/color"
-	"bufio"
 	"fmt"
-	"io/ioutil"
-	"os"
-	"path/filepath"
 	"strings"
 	"unicode"
 )
@@ -70,113 +63,6 @@ func trim(s string) string {
 	return strings.TrimSpace(s)
 }
 
-func KeyGenerate() {
-	// Check if APP_KEY is already set
-	if os.Getenv("APP_KEY") != "" {
-		fmt.Println(color.Colorize(color.Green, "App Key has been specified."))
-		os.Exit(0)
-	}
-
-	// Generate new APP_KEY
-	fmt.Println(color.Colorize(color.Green, "Generating key..."))
-	key := math.RandomString(50)
-
-	// Read .env file
-	envData, err := ioutil.ReadFile(envFilePath)
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Update APP_KEY value in .env file
-	newEnvData := updateEnvVariable(string(envData), "APP_KEY", key)
-
-	// Write new .env file
-	if err := ioutil.WriteFile(envFilePath, []byte(newEnvData), 0644); err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
-	}
-
-	// Print new APP_KEY value
-	fmt.Println(color.Colorize(color.Green, fmt.Sprintf("Key generated. Key: %s", key)))
-	os.Exit(0)
-}
-
-func ProductionCheck() {
-
-}
-
-func Rename(oldName string, newName string) {
-	err := filepath.Walk(".", func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		if filepath.Ext(path) == ".go" {
-			data, err := ioutil.ReadFile(path)
-			if err != nil {
-				return err
-			}
-			content := string(data)
-			if strings.Contains(content, oldName) && strings.Contains(content, `"`) {
-				if strings.Contains(content, fmt.Sprintf(`"%s/`, oldName)) {
-					newContent := strings.ReplaceAll(content, fmt.Sprintf(`"%s/`, oldName), fmt.Sprintf(`"%s/`, newName))
-					err = ioutil.WriteFile(path, []byte(newContent), 0644)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%s has been replaced with %s in file %s\n", oldName, newName, path)
-				} else if strings.Contains(content, fmt.Sprintf(` "%s"`, oldName)) {
-					newContent := strings.ReplaceAll(content, fmt.Sprintf(` "%s"`, oldName), fmt.Sprintf(` "%s"`, newName))
-					err = ioutil.WriteFile(path, []byte(newContent), 0644)
-					if err != nil {
-						return err
-					}
-					fmt.Printf("%s has been replaced with %s in file %s\n", oldName, newName, path)
-				}
-			}
-		}
-		return nil
-	})
-	if err != nil {
-		fmt.Printf("Error: %v\n", err)
-		os.Exit(1)
-	}
-}
-
-func Model(p string) {
-	if containsWhitespace(p) || containsUppercase(p) || containsSymbol(p) {
-		fmt.Println(color.Colorize(color.Red, "Model name cannot contain whitespace, uppercase, and symbol!"))
-		os.Exit(0)
-	}
-
-	modelName := stringable.Capitalize(p)
-
-	src, err := os.Open("./tools/templates/model.txt")
-	if err != nil {
-		fmt.Println(color.Colorize(color.Red, "GoAPIfy is corrupted, core files is missing!"))
-		os.Exit(0)
-	}
-	defer src.Close()
-
-	out, err := os.Create(fmt.Sprintf("./model/%s.go", p))
-	if err != nil {
-		fmt.Println(color.Colorize(color.Red, err.Error()))
-		os.Exit(0)
-	}
-	defer out.Close()
-
-	scanner := bufio.NewScanner(src)
-	line := strings.ReplaceAll(scanner.Text(), "${modelName}", modelName)
-
-	_, err = fmt.Fprintln(out, line)
-	if err != nil {
-		if err != nil {
-			fmt.Println(color.Colorize(color.Red, err.Error()))
-			os.Exit(0)
-		}
-	}
-}
-
 func containsWhitespace(s string) bool {
 	return strings.ContainsAny(s, " \t\n\r")
 }
@@ -197,4 +83,13 @@ func containsSymbol(s string) bool {
 		}
 	}
 	return false
+}
+
+func containsOnlyLettersAndNumbers(s string) bool {
+	for _, r := range s {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) {
+			return false
+		}
+	}
+	return true
 }

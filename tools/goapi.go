@@ -55,12 +55,12 @@ func main() {
 		}
 	}
 
-	if args[1] == "key" {
-		core.KeyGenerate()
+	if args[1] == "help" {
+		core.Help()
 	}
 
-	if args[1] == "production" {
-		core.ProductionCheck()
+	if args[1] == "key" {
+		core.KeyGenerate()
 	}
 
 	if args[1] == "rename" {
@@ -71,11 +71,19 @@ func main() {
 		core.Rename(args[2], args[3])
 	}
 
-	if args[2] == "model" {
+	if args[1] == "model" {
 		if len(args) != 3 {
 			fmt.Println(color.Colorize(color.Red, "Not enough arguments."))
 			os.Exit(0)
 		}
 		core.Model(args[2])
+	}
+
+	if args[1] == "compose" {
+		if len(args) != 3 {
+			fmt.Println(color.Colorize(color.Red, "Not enough arguments."))
+			os.Exit(0)
+		}
+		core.Docker(args[2])
 	}
 }
