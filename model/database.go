@@ -27,7 +27,7 @@ type Model interface {
 	Delete() error
 	Load(model interface{}) *model
 	Count() (int64, error)
-	With(relation string) error
+	With(relation string) *model
 }
 
 // model is the concrete type that implements the Model interface.
@@ -175,10 +175,22 @@ func (m *model) Save() error {
 // With adds an eager load for the specified relation.
 // It takes in a string representing the name of the relation, and applies an eager load for that relation to the current query.
 // If an error occurs during the eager load, the function returns an error object with the corresponding error message. Otherwise, it returns nil.
-func (m *model) With(relation string) error {
-	err := m.db.Preload(relation).Error
-	if err != nil {
-		return err
+func (m *model) With(relation string) *model {
+	m.db = m.db.Preload(relation)
+	return m
+}
+
+// The FindByIDPreload function retrieves a record from a database table by its ID, and preloads any specified associations using the GORM library in Go.
+// The function takes in the ID of the record, a pointer to a struct that represents the database table,
+// and an optional list of associations to preload. The function returns the populated struct and an error.
+func (m *model) FindByIDPreload(id uint, model interface{}, preloads ...string) (interface{}, error) {
+	query := m.db
+	for _, preload := range preloads {
+		query = query.Preload(preload)
 	}
-	return nil
+	err := query.First(model, id).Error
+	if err != nil {
+		return model, err
+	}
+	return model, nil
 }

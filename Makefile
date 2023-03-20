@@ -1,5 +1,4 @@
 # Load the environment variables from .env file
-include .env
 export
 
 # Define the command for deleting files based on the operating system
@@ -18,7 +17,6 @@ MODULE_PATH = $(shell go list -m)
 
 # Update the module dependencies and install any missing modules
 install:
-	@echo "Checking for .env file..."
 	make key
 	go mod tidy
 	go build -o ${EXE_NAME} tools/goapi.go
