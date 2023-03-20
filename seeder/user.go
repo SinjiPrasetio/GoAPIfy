@@ -33,7 +33,5 @@ func (s *UserSeeder) Seed(count int) error {
 			return err
 		}
 	}
-
 	return nil
-
 }
