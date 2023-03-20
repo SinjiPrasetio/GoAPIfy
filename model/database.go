@@ -25,6 +25,7 @@ type Model interface {
 	Update(data interface{}) (interface{}, error)
 	Delete(data interface{}) (interface{}, error)
 	Count(data interface{}) (int, error)
+	FindByIDPreload(id uint, model interface{}, preloads ...string) (interface{}, error)
 }
 
 // model is the concrete type that implements the Model interface.
@@ -86,4 +87,19 @@ func (m *model) Count(data interface{}) (int, error) {
 	var count int64
 	err := m.db.Model(data).Count(&count).Error
 	return int(count), err
+}
+
+// The FindByIDPreload function retrieves a record from a database table by its ID, and preloads any specified associations using the GORM library in Go.
+// The function takes in the ID of the record, a pointer to a struct that represents the database table,
+// and an optional list of associations to preload. The function returns the populated struct and an error.
+func (m *model) FindByIDPreload(id uint, model interface{}, preloads ...string) (interface{}, error) {
+	query := m.db
+	for _, preload := range preloads {
+		query = query.Preload(preload)
+	}
+	err := query.First(model, id).Error
+	if err != nil {
+		return model, err
+	}
+	return model, nil
 }
