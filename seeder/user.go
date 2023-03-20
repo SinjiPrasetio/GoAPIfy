@@ -29,7 +29,7 @@ func (s *UserSeeder) Seed(count int) error {
 			panic(err)
 		}
 
-		if _, err := s.AppService.Model.Create(&user); err != nil {
+		if _, err := s.AppService.Model.Load(&user).Create(); err != nil {
 			return err
 		}
 	}

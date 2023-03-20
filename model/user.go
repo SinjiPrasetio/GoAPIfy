@@ -15,3 +15,10 @@ type User struct {
 	AvatarPath *string
 	VerifiedAt *time.Time
 }
+
+type EmailVerification struct {
+	gorm.Model
+	UserID uint
+	User   User
+	Token  string
+}

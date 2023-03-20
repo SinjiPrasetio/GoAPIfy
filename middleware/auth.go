@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"GoAPIfy/config"
 	"GoAPIfy/core"
 	"GoAPIfy/model"
 	"GoAPIfy/service/appService"
@@ -53,7 +54,7 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 		userID := uint(claim["id"].(float64))
 
 		var userModel model.User
-		result, err := s.Model.FindByID(userID, userModel)
+		result, err := s.Model.Load(userModel).Find(userID)
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : user is unauthorized!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
@@ -64,6 +65,13 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 			errorMessage := core.FormatError(errors.New("access denied : user data corrupted!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
 			return
+		}
+
+		if config.VerifyEmail() {
+			if userData.VerifiedAt == nil {
+				errorMessage := core.FormatError(errors.New("access denied : user email is not verified!"))
+				core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			}
 		}
 
 		c.Set("currentUser", userData)

@@ -9,7 +9,7 @@ import (
 func RegisterSeeders(s appService.AppService) {
 
 	// Check if the User model has any data in the database
-	if count, err := s.Model.Count(&model.User{}); err != nil {
+	if count, err := s.Model.Load(&model.User{}).Count(); err != nil {
 		panic(err)
 	} else if count == 0 {
 		// Create a new instance of your UserFactory
