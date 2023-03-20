@@ -175,12 +175,9 @@ func (m *model) Save() error {
 // With adds an eager load for the specified relation.
 // It takes in a string representing the name of the relation, and applies an eager load for that relation to the current query.
 // If an error occurs during the eager load, the function returns an error object with the corresponding error message. Otherwise, it returns nil.
-func (m *model) With(relation string) error {
-	err := m.db.Preload(relation).Error
-	if err != nil {
-		return err
-	}
-	return nil
+func (m *model) With(relation string) *model {
+	m.db = m.db.Preload(relation)
+	return m
 }
 
 // The FindByIDPreload function retrieves a record from a database table by its ID, and preloads any specified associations using the GORM library in Go.
