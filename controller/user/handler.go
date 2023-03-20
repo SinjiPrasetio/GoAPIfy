@@ -68,7 +68,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	// Create the user in the database
-	_, err = h.s.Model.Load(&user).Create()
+	err = h.s.Model.Load(&user).Save()
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to create user"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)

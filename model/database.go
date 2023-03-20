@@ -21,13 +21,13 @@ func AutoMigration(db *gorm.DB) error {
 // Model is the interface that must be implemented by models.
 // It defines the common methods that will be used across different models.
 type Model interface {
-	Create() (interface{}, error)
 	Find(id uint) (interface{}, error)
 	Where(query interface{}, args ...interface{}) *model
-	Save(model interface{}) error
+	Save() error
 	Delete(data interface{}) (interface{}, error)
 	Load(model interface{}) *model
 	Count() (int64, error)
+	With(relation string) error
 }
 
 // model is the concrete type that implements the Model interface.
@@ -66,17 +66,7 @@ func (m *model) Load(model interface{}) *model {
 	return m
 }
 
-// Create creates a new model with the specified data.
-// It takes in a pointer to the model object and the data to be created, and returns the created data and an error, if any.
-// If the creation is successful, the function returns the created data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Create() (interface{}, error) {
-	err := m.db.Create(m.tempData).Error
-	return m.tempData, err
-}
-
-// FindByID searches for a model with the specified ID and returns it.
-// It takes in a pointer to the model object, the ID to search for, and returns the found data and an error, if any.
-// If the data is found, the function returns the data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
+// Find searches for a record with the specified ID and returns it.
 func (m *model) Find(id uint) (interface{}, error) {
 	err := m.db.First(m.tempData, id).Error
 	return m.tempData, err
@@ -108,8 +98,6 @@ func (m *model) Limit(limit int) *model {
 }
 
 // Delete deletes the specified record from the database.
-// It takes in a pointer to the model object and the data to be deleted, and returns the deleted data and an error, if any.
-// If the deletion is successful, the function returns the deleted data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
 func (m *model) Delete(data interface{}) (interface{}, error) {
 	err := m.db.Delete(data).Error
 	return data, err
@@ -152,8 +140,19 @@ func (m *model) Paginate(model interface{}, page int, perPage int) (*Pagination,
 }
 
 // Save creates a new record if the model has no ID, or updates an existing record if the model has an ID.
-func (m *model) Save(model interface{}) error {
-	err := m.db.Save(model).Error
+func (m *model) Save() error {
+	err := m.db.Save(m.tempData).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// With adds an eager load for the specified relation.
+// It takes in a string representing the name of the relation, and applies an eager load for that relation to the current query.
+// If an error occurs during the eager load, the function returns an error object with the corresponding error message. Otherwise, it returns nil.
+func (m *model) With(relation string) error {
+	err := m.db.Preload(relation).Error
 	if err != nil {
 		return err
 	}

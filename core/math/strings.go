@@ -2,7 +2,10 @@
 // random numbers and strings, and performing calculations on numbers.
 package math
 
-import "math/rand"
+import (
+	"encoding/hex"
+	"math/rand"
+)
 
 // RandomString generates a random string of the specified length.
 // It takes an integer length as input and returns a string containing a random
@@ -56,4 +59,24 @@ func RandomNumberString(length int) (string, error) {
 
 	// Convert the buffer of bytes to a string and return it.
 	return string(buffer), nil
+}
+
+// GenerateUUID generates a random UUID (v4) as a string.
+func GenerateUUID() (string, error) {
+	// Create a buffer to hold the random bytes.
+	buffer := make([]byte, 16)
+
+	// Read random bytes into the buffer.
+	_, err := rand.Read(buffer)
+	if err != nil {
+		return "", err
+	}
+
+	// Set the version (bits 12-15) to 4 as per the UUID v4 specification.
+	buffer[6] = (buffer[6] & 0x0f) | 0x40
+	// Set the variant (bits 16-17) to the RFC 4122 variant as per the UUID v4 specification.
+	buffer[8] = (buffer[8] & 0x3f) | 0x80
+
+	// Encode the buffer as a hex string and return it.
+	return hex.EncodeToString(buffer), nil
 }

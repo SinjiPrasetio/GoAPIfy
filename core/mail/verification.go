@@ -32,7 +32,7 @@ import (
 func VerificationMail(s appService.AppService, userData model.User, url string) error {
 	// Generate the verification token
 	token := math.RandomString(32)
-	if _, err := s.Model.Load(&model.EmailVerification{Token: token}).Create(); err != nil {
+	if err := s.Model.Load(&model.EmailVerification{Token: token}).Save(); err != nil {
 		return err
 	}
 
