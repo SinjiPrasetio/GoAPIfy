@@ -16,3 +16,8 @@ type LoginInput struct {
 	Email    string `json:"email"`    // The user's email (required)
 	Password string `json:"password"` // The user's password (required)
 }
+
+type EmailVerificationInput struct {
+	Email             string `json:"email"`
+	VerificationToken string `json:"verification_token"`
+}

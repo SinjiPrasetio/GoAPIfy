@@ -2,10 +2,14 @@ package main
 
 import (
 	"GoAPIfy/config"
+	"GoAPIfy/core/database"
 	"GoAPIfy/core/helper"
+	"GoAPIfy/core/service"
+	"GoAPIfy/cron"
 	"GoAPIfy/model"
 	"GoAPIfy/route"
 	"GoAPIfy/seeder"
+	"GoAPIfy/service/appService"
 	"fmt"
 	"log"
 	"os"
@@ -15,9 +19,8 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/driver/mysql"
+	"github.com/meilisearch/meilisearch-go"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 func main() {
@@ -28,17 +31,21 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// Get the database configuration from the environment variables
-	dbName := os.Getenv("DATABASE_NAME")
-	dbHost := os.Getenv("DATABASE_HOST")
-	dbPort := os.Getenv("DATABASE_PORT")
-	dbUser := os.Getenv("DATABASE_USER")
-	dbPass := os.Getenv("DATABASE_PASS")
+	// Get the configuration from the environment variables
+	databaseType := os.Getenv("DATABASE_TYPE")
 	productionStr := os.Getenv("APP_PRODUCTION")
 	production, err := strconv.ParseBool(productionStr)
 	if err != nil {
 		log.Fatal(helper.ColorizeCmd(helper.Green, "Error converting APP_PRODUCTION to boolean."))
 	}
+
+	// Connecting to Meilisearch Server and initialize
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Connecting to Meilisearch..."))
+	meilisearchClient := meilisearch.NewClient(meilisearch.ClientConfig{
+		Host:   "http://127.0.0.1:7700",
+		APIKey: os.Getenv("MEILI_MASTER_KEY"),
+	})
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Meilisearch initialized..."))
 
 	// Print a message to indicate that the web server is being deployed
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Deploying Web Server..."))
@@ -62,21 +69,23 @@ func main() {
 	// Print a message to indicate that the server is connecting to the database
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Connect to database..."))
 
-	// Create a Data Source Name (DSN) for the database connection
-	dsn := dbUser + ":" + dbPass + "@tcp(" + dbHost + ":" + dbPort + ")/" + dbName + "?charset=utf8mb4&parseTime=True&loc=Local&net_write_timeout=6000"
-
-	// Open a connection to the database with the specified DSN and configuration
-	var loggerOption = &gorm.Config{}
-	// If the APP_PRODUCTION environment variable is not set to true,
-	// open a connection to the database with GORM, using the provided DSN
-	// and logger settings
-	if !production {
-		loggerOption = &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		}
+	var db *gorm.DB
+	switch databaseType {
+	case "mysql", "mariadb":
+		db, err = database.InitMysql(production)
+	case "postgres", "postgresql":
+		db, err = database.InitPostgres(production)
+	case "sqlite":
+		db, err = database.InitSQLite(production)
+	case "mssql", "sqlserver":
+		db, err = database.InitMSSQL(production)
+	default:
+		log.Fatal("DATABASE_TYPE is not supported. Make sure you have configure your database correctly.")
 	}
 
-	db, err := gorm.Open(mysql.Open(dsn), loggerOption)
+	// Initialize Redis client
+	fmt.Println(helper.ColorizeCmd(helper.Green, "Connecting to Redis (if enabled)..."))
+	redisClient := database.InitRedis()
 
 	// Print a message to indicate that the models are being migrated
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Migrating models..."))
@@ -87,14 +96,26 @@ func main() {
 	// Loading modelService
 	modelService := model.NewModel(db)
 
-	seeder.RegisterSeeders(modelService)
+	appService := appService.AppService{Model: modelService, MeiliSearch: meilisearchClient, Redis: redisClient}
+
+	// Initialize Cron Jobs
+	fmt.Println(helper.ColorizeCmd(helper.Magenta, "Initialize Cron Jobs"))
+	cron := cron.NewCron(appService)
+	cron.Start()
+
+	seeder.RegisterSeeders(appService)
 
 	// Define the API routes
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Defining routes..."))
-	route.API(server, modelService)
+	route.API(server, appService)
 
 	// Serve static files from the public directory
 	server.Static("/storage", "./public")
+
+	// Register a handler function for the "/websocket/service" endpoint of the server
+	fmt.Println("Initiating Websocket Route")
+	server.GET("/websocket/service", service.WSHandler)
+	fmt.Println("Websocket Deployed!")
 
 	// Print a message to indicate that the web server is starting
 	fmt.Println(helper.ColorizeCmd(helper.Green, "Starting Web Server..."))

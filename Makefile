@@ -4,8 +4,10 @@ export
 # Define the command for deleting files based on the operating system
 ifeq ($(OS), Windows_NT)
     RM = del /S /Q 
+	EXE_NAME = "goapi.exe"
 else
     RM = rm -Rf
+	EXE_NAME = "goapi"
 endif
 
 .PHONY: key
@@ -17,7 +19,7 @@ MODULE_PATH = $(shell go list -m)
 install:
 	make key
 	go mod tidy
-	go mod vendor
+	go build -o ${EXE_NAME} tools/goapi.go
 
 # Run the development server
 dev:
@@ -61,6 +63,10 @@ rename:
 	@echo "Renaming project..."
 	go run tools/goapi.go rename $(shell go list -m) $(APP_NAME)
 	go mod edit -module $(APP_NAME)
+	go mod tidy
+
+model:
+	go run tools/goapi.go model $(arg)
 	go mod tidy
 
 key:

@@ -2,6 +2,8 @@ package model
 
 import (
 	"fmt"
+	"math"
+	"strings"
 
 	"gorm.io/gorm"
 )
@@ -19,74 +21,166 @@ func AutoMigration(db *gorm.DB) error {
 // Model is the interface that must be implemented by models.
 // It defines the common methods that will be used across different models.
 type Model interface {
-	Create(data interface{}) (interface{}, error)
-	FindByID(id uint, model interface{}) (interface{}, error)
-	FindByKey(key string, value string, model interface{}) (interface{}, error)
-	Update(data interface{}) (interface{}, error)
-	Delete(data interface{}) (interface{}, error)
-	Count(data interface{}) (int, error)
-	FindByIDPreload(id uint, model interface{}, preloads ...string) (interface{}, error)
+	Find(id uint) (interface{}, error)
+	Where(query interface{}, args ...interface{}) *model
+	Save() error
+	Delete() error
+	Load(model interface{}) *model
+	Count() (int64, error)
+	With(relation string) error
 }
 
 // model is the concrete type that implements the Model interface.
 // It provides the actual implementation of the methods defined in the interface.
 type model struct {
-	db *gorm.DB
+	db       *gorm.DB
+	tempData interface{}
+	memoryDB *gorm.DB
+}
+
+// Pagination represents pagination information.
+type Pagination struct {
+	Records        interface{}
+	TotalRecords   int
+	TotalPages     int
+	CurrentPage    int
+	RecordsPerPage int
 }
 
 // NewModel creates a new instance of the model type with the specified database connection.
 func NewModel(db *gorm.DB) *model {
-	return &model{db}
+	var v interface{}
+	return &model{db, v, db}
 }
 
-// Create creates a new model with the specified data.
-// It takes in a pointer to the model object and the data to be created, and returns the created data and an error, if any.
-// If the creation is successful, the function returns the created data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Create(data interface{}) (interface{}, error) {
-	err := m.db.Create(data).Error
-	return data, err
+// modelLoad specifies the model to be used for subsequent database operations.
+// It takes in a pointer to the model object and returns a pointer to the model object.
+// This method sets the current model to the specified model object, allowing it to be used for subsequent database operations.
+func (m *model) modelLoad(model interface{}) *model {
+	m.db = m.memoryDB.Model(model)
+	return m
 }
 
-// FindByID searches for a model with the specified ID and returns it.
-// It takes in a pointer to the model object, the ID to search for, and returns the found data and an error, if any.
+// Load loads data into the specified model object.
+// It takes in a pointer to the model object, loads it into the model, and returns a pointer to the model object.
+// This method loads the specified model object into the current model, allowing it to be used for subsequent database operations.
+func (m *model) Load(model interface{}) *model {
+	m.modelLoad(&model)
+	m.tempData = model
+	return m
+}
+
+// Find searches for a model with the specified ID and returns it.
+// It takes in a uint representing the ID to search for, and returns the found data and an error, if any.
 // If the data is found, the function returns the data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) FindByID(id uint, model interface{}) (interface{}, error) {
-	err := m.db.First(model, id).Error
-	return model, err
+func (m *model) Find(id uint) (interface{}, error) {
+	err := m.db.First(m.tempData, id).Error
+	return m.tempData, err
 }
 
-// FindByKey searches for a model with the specified key/value pair and returns it.
-// It takes in a pointer to the model object, the key and value to search for, and a pointer to the model where the found data will be stored.
-// The function returns the found data and an error, if any. If the data is found, it is stored in the model and returned with a nil error.
-// If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) FindByKey(key string, value string, model interface{}) (interface{}, error) {
-	err := m.db.Where(fmt.Sprintf("%s = ?", key), value).Find(model).Error
-	return model, err
+// Where applies the specified query to the model.
+// It takes in a query interface and a variable number of arguments, and returns a pointer to the model object.
+// This method applies the specified query to the current query on the model, with the specified arguments.
+func (m *model) Where(query interface{}, args ...interface{}) *model {
+	m.db = m.db.Where(query, args...)
+	return m
 }
 
-// Update updates an existing record in the database by saving the provided data to the model's database object.
-// It takes in a pointer to the model object and the data to be updated, and returns the updated data and an error, if any.
-// If the update is successful, the function returns the updated data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Update(data interface{}) (interface{}, error) {
-	err := m.db.Save(data).Error
-	return data, err
+// Get retrieves the records that match the current query.
+// It takes no input parameters and returns an error, if any.
+// If the retrieval is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Get() error {
+	return m.db.Find(m.tempData).Error
 }
 
-// Delete deletes the specified record from the database.
-// It takes in a pointer to the model object and the data to be deleted, and returns the deleted data and an error, if any.
-// If the deletion is successful, the function returns the deleted data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Delete(data interface{}) (interface{}, error) {
-	err := m.db.Delete(data).Error
-	return data, err
+// OrderBy specifies the order in which the records should be retrieved.
+// It takes in two strings representing the column and the mode of the order, respectively, and returns a pointer to the model object.
+// This method orders the records in the database by the specified column, with the specified mode of order (ASC or DESC).
+func (m *model) OrderBy(column string, mode string) *model {
+	mode = strings.ToUpper(mode)
+	order := fmt.Sprintf("%s %s", column, mode)
+	m.db = m.db.Order(order)
+	return m
 }
 
-// Count counts the number of records that match the specified data.
-// It takes in a pointer to the model object and the data to be counted, and returns the count and an error, if any.
-// If the count is successful, the function returns the count with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Count(data interface{}) (int, error) {
+// Limit specifies the maximum number of records to retrieve.
+// It takes in an integer representing the maximum number of records to retrieve, and returns a pointer to the model object.
+// This method limits the number of records that can be retrieved from the database to the specified limit.
+func (m *model) Limit(limit int) *model {
+	m.db = m.db.Limit(limit)
+	return m
+}
+
+// Delete : deletes the specified record from the database.
+// It takes no input parameters and returns an error, if any.
+// If the deletion is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Delete() error {
+	err := m.db.Delete(m.tempData).Error
+	return err
+}
+
+// Count returns the total number of records that match the current query.
+// It takes no input parameters and returns the total number of records as an int64 and an error, if any.
+// If the counting is successful, the function returns the total number of records with a nil error. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Count() (int64, error) {
 	var count int64
-	err := m.db.Model(data).Count(&count).Error
-	return int(count), err
+	err := m.db.Count(&count).Error
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+// Get retrieves the records that match the current query.
+// It takes no input parameters and returns an error, if any.
+// If the retrieval is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
+// It takes in a pointer to the model object, the page number, and the number of records per page, and returns a pointer to a Pagination object and an error, if any.
+// If the pagination is successful, the function returns a pointer to the Pagination object with a nil error. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Paginate(model interface{}, page int, perPage int) (*Pagination, error) {
+	var totalRecords int64
+	m.db.Model(model).Count(&totalRecords)
+
+	offset := (page - 1) * perPage
+	m.db = m.db.Offset(offset).Limit(perPage)
+
+	err := m.db.Find(model).Error
+	if err != nil {
+		return nil, err
+	}
+
+	totalPages := int(math.Ceil(float64(int(totalRecords)) / float64(perPage)))
+
+	pagination := &Pagination{
+		Records:        model,
+		TotalRecords:   int(totalRecords),
+		CurrentPage:    page,
+		TotalPages:     totalPages,
+		RecordsPerPage: perPage,
+	}
+
+	return pagination, nil
+}
+
+// Save creates a new record if the model has no ID, or updates an existing record if the model has an ID.
+// It takes no input parameters and returns an error, if any.
+// If the creation or update is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Save() error {
+	err := m.db.Save(m.tempData).Error
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// With adds an eager load for the specified relation.
+// It takes in a string representing the name of the relation, and applies an eager load for that relation to the current query.
+// If an error occurs during the eager load, the function returns an error object with the corresponding error message. Otherwise, it returns nil.
+func (m *model) With(relation string) error {
+	err := m.db.Preload(relation).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // The FindByIDPreload function retrieves a record from a database table by its ID, and preloads any specified associations using the GORM library in Go.
