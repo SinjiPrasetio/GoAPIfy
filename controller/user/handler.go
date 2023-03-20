@@ -113,7 +113,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	var userData model.User
 	test := h.s.Model.Load(&userData)
 	fmt.Println(test)
-	err = h.s.Model.Load(&userData).Where("email = ?", email).With("Blog").Get()
+	err = h.s.Model.Load(&userData).Where("email = ?", email).Get()
 	if err != nil {
 		// If there is an error retrieving the user data, send an error response
 		// Note: this assumes that the FindByKey method returns an error when the key is not found in the database
