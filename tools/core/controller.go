@@ -59,39 +59,6 @@ func CreateHandler(p string, controllerName string) {
 		os.Exit(0)
 	}
 
-	// Update the contents of the register file
-	registerFile, err := os.OpenFile("./controller/register.go", os.O_RDWR, 0644)
-	if err != nil {
-		fmt.Println(color.Colorize(color.Red, "GoAPIfy is corrupted, core files is missing!"))
-		os.Exit(0)
-	}
-	defer registerFile.Close()
-	registerBytes, err := ioutil.ReadAll(registerFile)
-	if err != nil {
-		panic(err)
-	}
-	registerContent := string(registerBytes)
-
-	// Check if the handler is already registered
-	if strings.Contains(registerContent, fmt.Sprintf("%sHandler *%s.%sHandler", controllerName, strings.ToLower(controllerName), controllerName)) {
-		fmt.Println(color.Colorize(color.Green, "Handler already registered"))
-		return
-	}
-
-	// Add the new handler to the Handlers struct
-	handlerLine := fmt.Sprintf("\t%sHandler *%s.%sHandler\n", controllerName, strings.ToLower(controllerName), controllerName)
-	newRegisterContent := strings.ReplaceAll(registerContent, "}\n", handlerLine+"}\n")
-
-	// Update the RegisterHandler function to register the new handler
-	registerHandlerLine := fmt.Sprintf("\t\t%sHandler: %s.New%sHandler(s, authService),\n", strings.ToLower(controllerName), strings.ToLower(controllerName), controllerName)
-	newRegisterContent = strings.ReplaceAll(newRegisterContent, "// Initialize other handlers as needed\n", registerHandlerLine+"// Initialize other handlers as needed\n")
-
-	// Write the modified contents of the register file
-	registerFile.Seek(0, 0)
-	if _, err := registerFile.WriteString(newRegisterContent); err != nil {
-		panic(err)
-	}
-
 }
 
 func CreateFormatter(p string, controllerName string) {
