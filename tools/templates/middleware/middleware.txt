@@ -1,0 +1,14 @@
+package ${middlewarePackage}
+
+import (
+	"GoAPIfy/service/appService"
+	"GoAPIfy/service/auth"
+
+	"github.com/gin-gonic/gin"
+)
+
+func ${middlewareName}(authService auth.AuthService, s appService.AppService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Write your middleware here
+	}
+}

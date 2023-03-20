@@ -2,12 +2,15 @@ package core
 
 import (
 	"GoAPIfy/core/math"
+	"GoAPIfy/core/stringable"
 	"GoAPIfy/tools/core/color"
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 const envFilePath = ".env"
@@ -138,4 +141,60 @@ func Rename(oldName string, newName string) {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+}
+
+func Model(p string) {
+	if containsWhitespace(p) || containsUppercase(p) || containsSymbol(p) {
+		fmt.Println(color.Colorize(color.Red, "Model name cannot contain whitespace, uppercase, and symbol!"))
+		os.Exit(0)
+	}
+
+	modelName := stringable.Capitalize(p)
+
+	src, err := os.Open("./tools/templates/model.txt")
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, "GoAPIfy is corrupted, core files is missing!"))
+		os.Exit(0)
+	}
+	defer src.Close()
+
+	out, err := os.Create(fmt.Sprintf("./model/%s.go", p))
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, err.Error()))
+		os.Exit(0)
+	}
+	defer out.Close()
+
+	scanner := bufio.NewScanner(src)
+	line := strings.ReplaceAll(scanner.Text(), "${modelName}", modelName)
+
+	_, err = fmt.Fprintln(out, line)
+	if err != nil {
+		if err != nil {
+			fmt.Println(color.Colorize(color.Red, err.Error()))
+			os.Exit(0)
+		}
+	}
+}
+
+func containsWhitespace(s string) bool {
+	return strings.ContainsAny(s, " \t\n\r")
+}
+
+func containsUppercase(s string) bool {
+	for _, r := range s {
+		if unicode.IsUpper(r) {
+			return true
+		}
+	}
+	return false
+}
+
+func containsSymbol(s string) bool {
+	for _, r := range s {
+		if unicode.IsSymbol(r) {
+			return true
+		}
+	}
+	return false
 }

@@ -1,0 +1,15 @@
+package ${controllerPackage}
+
+import (
+	"GoAPIfy/service/appService"
+	"GoAPIfy/service/auth"
+)
+
+type ${controllerName}Handler struct {
+	s           appService.AppService
+	authService auth.AuthService
+}
+
+func New${controllerName}Handler(s appService.AppService, authService auth.AuthService) *${controllerName}Handler {
+	return &${controllerName}Handler{s, authService}
+}

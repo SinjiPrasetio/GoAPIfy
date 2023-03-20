@@ -1,0 +1,11 @@
+package model
+
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
+
+type ${modelName} struct {
+	gorm.Model
+}

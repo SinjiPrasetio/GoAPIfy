@@ -1,0 +1,42 @@
+package ${controllerPackage}
+
+import (
+	"GoAPIfy/model"
+	"time"
+)
+
+type ${controllerNameFormat} struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+type $controllerNameWithTokenFormat struct {
+	ID        uint      `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+func ${controllerNameFormat}ter(${controllerPackage} model.$controllerName) ${controllerNameFormat} {
+	return ${controllerNameFormat}{
+		ID:        ${controllerPackage}.ID,
+		CreatedAt: ${controllerPackage}.CreatedAt,
+		UpdatedAt: ${controllerPackage}.UpdatedAt,
+	}
+}
+
+func $controllerNameWithTokenFormatter(${controllerPackage} model.$controllerName, token string) $controllerNameWithTokenFormat {
+	return $controllerNameWithTokenFormat{
+		ID:        ${controllerPackage}.ID,
+		CreatedAt: ${controllerPackage}.CreatedAt,
+		UpdatedAt: ${controllerPackage}.UpdatedAt,
+	}
+}
+
+func $controllerNameCollectionFormatter(${controllerPackage}s []model.$controllerName) []${controllerNameFormat} {
+	var values []${controllerNameFormat}
+	for _, ${controllerPackage} := range ${controllerPackage}s {
+		values = append(values, ${controllerNameFormat}ter(${controllerPackage}))
+	}
+	return values
+}

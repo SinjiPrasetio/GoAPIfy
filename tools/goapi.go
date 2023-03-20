@@ -16,7 +16,7 @@ const envFilePath = ".env"
 func main() {
 	// Get argument from the command line.
 	args := os.Args
-	if len(args) == 0 {
+	if len(args) == 1 {
 		fmt.Println(color.Colorize(color.Red, "No command input, please use make help to view commands."))
 		os.Exit(0)
 	}
@@ -69,5 +69,13 @@ func main() {
 			os.Exit(0)
 		}
 		core.Rename(args[2], args[3])
+	}
+
+	if args[2] == "model" {
+		if len(args) != 3 {
+			fmt.Println(color.Colorize(color.Red, "Not enough arguments."))
+			os.Exit(0)
+		}
+		core.Model(args[2])
 	}
 }

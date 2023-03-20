@@ -64,5 +64,9 @@ rename:
 	go mod edit -module $(APP_NAME)
 	go mod tidy
 
+model:
+	go run tools/goapi.go model $(arg)
+	go mod tidy
+
 key:
 	go run tools/goapi.go key
