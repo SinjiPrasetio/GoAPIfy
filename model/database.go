@@ -180,17 +180,33 @@ func (m *model) With(relation string) *model {
 	return m
 }
 
-// The FindByIDPreload function retrieves a record from a database table by its ID, and preloads any specified associations using the GORM library in Go.
-// The function takes in the ID of the record, a pointer to a struct that represents the database table,
-// and an optional list of associations to preload. The function returns the populated struct and an error.
-func (m *model) FindByIDPreload(id uint, model interface{}, preloads ...string) (interface{}, error) {
-	query := m.db
-	for _, preload := range preloads {
-		query = query.Preload(preload)
+// Chunk retrieves records from the database in batches of the specified size,
+// and processes each batch using the provided callback function.
+// It takes in the size of each batch, and a callback function that processes the records in each batch.
+// The callback function takes a slice of the model type and returns an error, if any.
+// If the retrieval and processing of all batches is successful, the function returns nil. If an error occurs, it returns an error object with the corresponding error message.
+func (m *model) Chunk(batchSize int, callback func(records []interface{}) error) error {
+	var lastID uint
+	for {
+		// Retrieve the next batch of records from the database
+		var records []interface{}
+		if err := m.db.Where("id > ?", lastID).Limit(batchSize).Find(&records).Error; err != nil {
+			return err
+		}
+		if len(records) == 0 {
+			break // No more records left to retrieve
+		}
+
+		// Call the callback function with the current batch of records
+		if err := callback(records); err != nil {
+			return err
+		}
+
+		// Update the last ID to the last ID of the current batch
+		lastRecord := records[len(records)-1]
+		lastIDField := m.db.Statement.Schema.LookUpField("ID")
+		lastID = uint(lastIDField.ValueOf(lastRecord).Uint())
 	}
-	err := query.First(model, id).Error
-	if err != nil {
-		return model, err
-	}
-	return model, nil
+
+	return nil
 }
