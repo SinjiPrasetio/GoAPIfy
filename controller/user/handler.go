@@ -139,7 +139,11 @@ func (h *UserHandler) Login(c *gin.Context) {
 
 	// Generate a JWT token using the user data
 	jwt, err := h.authService.GenerateToken(userData)
-
+	if err != nil {
+		errorMessage := core.FormatError(err)
+		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
+		return
+	}
 	// Format the user data and token into a response object
 	response := UserWithTokenFormatter(userData, jwt)
 
