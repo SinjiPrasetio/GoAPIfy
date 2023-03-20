@@ -13,6 +13,7 @@ import (
 // New models should be added here to ensure their corresponding database tables are created or updated during migration.
 func AutoMigration(db *gorm.DB) error {
 	err := db.AutoMigrate(
+		&Test{},
 		&User{},
 	)
 	return err

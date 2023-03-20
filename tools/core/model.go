@@ -52,4 +52,36 @@ func Model(p string) {
 	}
 
 	fmt.Println(color.Colorize(color.Magenta, fmt.Sprintf("%s model created!", p)))
+
+	// update the migration
+	migrationFile, err := os.OpenFile("./model/database.go", os.O_RDWR, 0644)
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, err.Error()))
+		os.Exit(0)
+	}
+	defer migrationFile.Close()
+
+	migrationBytes, err := ioutil.ReadAll(migrationFile)
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, err.Error()))
+		os.Exit(0)
+	}
+	// Check if the model already exists in the migration
+	if strings.Contains(string(migrationBytes), fmt.Sprintf("&%s{}", modelName)) {
+		fmt.Println(color.Colorize(color.Green, fmt.Sprintf("%s model already exists in migration", p)))
+		return
+	}
+	// Add the new model to the migration
+	migrationContent := strings.ReplaceAll(string(migrationBytes), "AutoMigrate(\n", fmt.Sprintf("AutoMigrate(\n\t\t&%s{},\n", modelName))
+	_, err = migrationFile.Seek(0, 0)
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, err.Error()))
+		os.Exit(0)
+	}
+	_, err = migrationFile.WriteString(migrationContent)
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, err.Error()))
+		os.Exit(0)
+	}
+	fmt.Println(color.Colorize(color.Green, fmt.Sprintf("%s model added to migration", p)))
 }
