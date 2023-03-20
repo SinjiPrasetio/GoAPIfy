@@ -54,5 +54,15 @@ func Rename() {
 		fmt.Printf("Error: %v\n", err)
 		os.Exit(1)
 	}
+
+	cmd = exec.Command("go", "mod", "edit", "-module", os.Getenv("APP_NAME"))
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println(color.Colorize(color.Red, fmt.Sprintf("Error running development server: %s", err)))
+		os.Exit(0)
+	}
 	fmt.Println(color.Colorize(color.Magenta, fmt.Sprintf("Successfully renamed the project from %s to %s!", oldName, newName)))
 }
