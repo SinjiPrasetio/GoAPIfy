@@ -14,6 +14,7 @@ import (
 func AutoMigration(db *gorm.DB) error {
 	err := db.AutoMigrate(
 		&User{},
+		&EmailVerification{},
 	)
 	return err
 }
