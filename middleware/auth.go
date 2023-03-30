@@ -26,7 +26,6 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 		if !strings.Contains(authHeader, "Bearer") {
 			errorMessage := core.FormatError(errors.New("access denied : you're not authorized to call this api!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			return
 		}
 
 		// Split Bearer dan Token
@@ -40,7 +39,6 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : fail to validate token!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			return
 		}
 
 		claim, ok := token.Claims.(jwt.MapClaims)
@@ -48,7 +46,6 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 		if !ok || !token.Valid {
 			errorMessage := core.FormatError(errors.New("access denied : token is not valid!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			return
 		}
 
 		userID := uint(claim["id"].(float64))
@@ -58,13 +55,11 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : user is unauthorized!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			return
 		}
 		userData, ok := result.(model.User)
 		if !ok {
 			errorMessage := core.FormatError(errors.New("access denied : user data corrupted!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			return
 		}
 
 		if config.VerifyEmail() {
