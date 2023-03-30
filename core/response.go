@@ -96,11 +96,7 @@ func SendResponse(c *gin.Context, status int, response interface{}) {
 	data := FormatResponse(statusMessages[status], status, statusString, response)
 
 	// Send the formatted response object back to the client using the JSON method provided by the Gin framework
-	if status == http.StatusOK {
-		c.JSON(status, data)
-	} else {
-		c.AbortWithStatusJSON(status, data)
-	}
+	c.AbortWithStatusJSON(status, data)
 }
 
 // FormatError takes in an error object and returns a Gin H object with an "errors" key containing a slice of error messages.

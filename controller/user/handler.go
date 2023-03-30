@@ -42,14 +42,12 @@ func (h *UserHandler) Register(c *gin.Context) {
 		// If the request body is invalid or incomplete, send an error response
 		errorMessage := core.FormatError(err)
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	// Check that the password and confirmation password match
 	if input.Password != input.CPassword {
 		errorMessage := core.FormatError(errors.New("passwords do not match"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	// Hash the password
@@ -57,7 +55,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to hash password"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
-		return
 	}
 
 	// Create a new User instance with the input data and hashed password
@@ -72,7 +69,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to create user"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
-		return
 	}
 
 	// Generate a JWT token using the user data
@@ -80,7 +76,6 @@ func (h *UserHandler) Register(c *gin.Context) {
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to generate token"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
-		return
 	}
 
 	// Format the user data and token into a response object
@@ -92,7 +87,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 
 // Login is a method for handling POST requests related to user login.
 // It takes a *gin.Context as input and expects the request body to be in JSON format.
-// If the input data is invalid or incomplete, it returns an error response.
+// If the input data is invalid or incomplete, its an error response.
 // If the user credentials are invalid, it returns an unauthorized response.
 // If the user credentials are valid, it returns a success response with a JWT token.
 func (h *UserHandler) Login(c *gin.Context) {
@@ -103,7 +98,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 		// If the request body is invalid or incomplete, send an error response
 		errorMessage := core.FormatError(err)
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	email := input.Email       // Get the email from the input data
@@ -116,17 +110,15 @@ func (h *UserHandler) Login(c *gin.Context) {
 	err = h.s.Model.Load(&userData).Where("email = ?", email).Get()
 	if err != nil {
 		// If there is an error retrieving the user data, send an error response
-		// Note: this assumes that the FindByKey method returns an error when the key is not found in the database
+		// Note: this assumes that the FindByKey meths an error when the key is not found in the database
 		errorMessage := core.FormatError(err)
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	// Check that the email in the retrieved user data matches the email provided in the login input
 	if userData.Email != email {
 		errorMessage := core.FormatError(errors.New("email not match"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	// Check that the password provided in the login input matches the password in the retrieved user data
@@ -134,7 +126,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("password not match"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 
 	// Generate a JWT token using the user data
@@ -142,7 +133,6 @@ func (h *UserHandler) Login(c *gin.Context) {
 	if err != nil {
 		errorMessage := core.FormatError(err)
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
-		return
 	}
 	// Format the user data and token into a response object
 	response := UserWithTokenFormatter(userData, jwt)
