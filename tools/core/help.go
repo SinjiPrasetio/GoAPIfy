@@ -25,5 +25,7 @@ func Help() {
 	fmt.Println(color.Colorize(color.Green, "     Command to rename your application based from .env\n     (Please make sure you have changed your APP_NAME in .env).\n"))
 	fmt.Println(color.Colorize(color.Magenta, "   entity [name]"))
 	fmt.Println(color.Colorize(color.Green, "     Create a new entity.\n     Entity is a package of controller and model.\n     It creates controllers file (input, handlers, and formatter) and model.\n     (Entity only contain alphanumeric no symbols and capital letters).\n"))
+	fmt.Println(color.Colorize(color.Magenta, "   middleware [name]"))
+	fmt.Println(color.Colorize(color.Green, "     Create a new middleware.\n     Entity is a package of middleware and model.\n     It creates middleware file.\n     (Entity only contain alphanumeric no symbols and capital letters).\n"))
 	os.Exit(0)
 }

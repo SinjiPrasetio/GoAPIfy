@@ -71,6 +71,33 @@ func main() {
 		core.Rename()
 	}
 
+	if args[1] == "middleware" {
+		core.PrintLogo()
+
+		if len(args) != 3 {
+			fmt.Println(color.Colorize(color.Red, "Not enough arguments."))
+			os.Exit(0)
+		}
+		p := args[2]
+		middleware := storage.FileExists(fmt.Sprintf("./middleware/%s.go", p))
+		if middleware {
+			fmt.Println(color.Colorize(color.Red, fmt.Sprintf("%s middleware is existed, cannot create new middleware!", p)))
+			fmt.Println(color.Colorize(color.Yellow, "Would you like to delete and create new one?? (y/n)"))
+			var input string
+			fmt.Scanln(&input)
+			if input == "y" || input == "Y" {
+				err = os.Remove(fmt.Sprintf("./middleware/%s.go", p))
+				if err != nil {
+					fmt.Println(color.Colorize(color.Red, err.Error()))
+				}
+			}
+			if input != "y" && input != "Y" {
+				os.Exit(0)
+			}
+		}
+		core.Middleware(args[2])
+	}
+
 	if args[1] == "entity" {
 		core.PrintLogo()
 
