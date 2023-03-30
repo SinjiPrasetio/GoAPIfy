@@ -19,7 +19,7 @@ func main() {
 	// Get argument from the command line.
 	args := os.Args
 	if len(args) == 1 {
-		fmt.Println(color.Colorize(color.Red, "No command input, please use make help to view commands."))
+		fmt.Println(color.Colorize(color.Red, "No command input, please use apify help to view commands."))
 		os.Exit(0)
 	}
 
@@ -221,4 +221,7 @@ func main() {
 			os.Exit(0)
 		}
 	}
+
+	fmt.Println(color.Colorize(color.Red, "Wrong command input, please use apify help to view commands."))
+	os.Exit(0)
 }
