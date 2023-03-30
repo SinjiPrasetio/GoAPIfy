@@ -4,6 +4,7 @@ package user
 
 import (
 	"GoAPIfy/core"
+	"GoAPIfy/core/math"
 	"GoAPIfy/model"
 	"GoAPIfy/service/appService"
 	"GoAPIfy/service/auth"
@@ -12,7 +13,6 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"golang.org/x/crypto/bcrypt"
 )
 
 // UserHandler is a struct containing methods for handling user-related requests.
@@ -51,7 +51,7 @@ func (h *UserHandler) Register(c *gin.Context) {
 	}
 
 	// Hash the password
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.Password), bcrypt.DefaultCost)
+	hashedPassword, err := math.Hash(input.Password)
 	if err != nil {
 		errorMessage := core.FormatError(errors.New("failed to hash password"))
 		core.SendResponse(c, http.StatusInternalServerError, errorMessage)
@@ -122,8 +122,9 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	// Check that the password provided in the login input matches the password in the retrieved user data
-	err = bcrypt.CompareHashAndPassword([]byte(userData.Password), []byte(password))
-	if err != nil {
+
+	challange := math.HashChallenge(password, userData.Password)
+	if !challange {
 		errorMessage := core.FormatError(errors.New("password not match"))
 		core.SendResponse(c, http.StatusUnprocessableEntity, errorMessage)
 	}

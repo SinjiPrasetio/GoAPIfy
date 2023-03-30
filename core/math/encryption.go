@@ -5,6 +5,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -56,4 +57,20 @@ func Decrypt(text string) (string, error) {
 
 	return string(ciphertext), nil
 
+}
+
+// Hash takes a plaintext password and returns the hashed password as a base64-encoded string.
+// It uses the SHA-256 hash function to generate the hash.
+func Hash(password string) (string, error) {
+	hash := sha256.Sum256([]byte(password))
+	output := base64.StdEncoding.EncodeToString(hash[:])
+	return output, nil
+}
+
+// HashChallenge takes a plaintext password and a base64-encoded hash challenge and returns true if the hash of the password matches the challenge.
+// It uses the SHA-256 hash function to generate the hash.
+func HashChallenge(password string, challenge string) bool {
+	hash := sha256.Sum256([]byte(password))
+	hashString := base64.StdEncoding.EncodeToString(hash[:])
+	return hashString == challenge
 }
