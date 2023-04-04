@@ -57,16 +57,11 @@ func NewModel(db *gorm.DB) *model {
 // modelLoad specifies the model to be used for subsequent database operations.
 // It takes in a pointer to the model object and returns a pointer to the model object.
 // This method sets the current model to the specified model object, allowing it to be used for subsequent database operations.
-func (m *model) modelLoad(model interface{}) *model {
-	m.db = m.memoryDB.Model(model)
-	return m
-}
 
 // Load loads data into the specified model object.
 // It takes in a pointer to the model object, loads it into the model, and returns a pointer to the model object.
 // This method loads the specified model object into the current model, allowing it to be used for subsequent database operations.
 func (m *model) Load(model interface{}) *model {
-	m.modelLoad(&model)
 	m.tempData = model
 	return m
 }
@@ -179,4 +174,87 @@ func (m *model) Save() error {
 func (m *model) With(relation string) *model {
 	m.db = m.db.Preload(relation)
 	return m
+}
+
+// BeginTransaction starts a new database transaction and returns a pointer to
+// the model instance, allowing for method chaining. It saves the current database
+// connection state in memoryDB before starting the transaction.
+func (m *model) BeginTransaction() *model {
+	tx := m.db.Begin()
+	m.memoryDB = m.db
+	m.db = tx
+	return m
+}
+
+// CommitTransaction commits the current database transaction and returns an error
+// if any issues occur during the commit operation.
+func (m *model) CommitTransaction() error {
+	return m.db.Commit().Error
+}
+
+// RollbackTransaction rolls back the current database transaction and returns an
+// error if any issues occur during the rollback operation.
+func (m *model) RollbackTransaction() error {
+	return m.db.Rollback().Error
+}
+
+// ApplyScope applies a given scope function to the model's query and returns a pointer
+// to the model instance. The scope function should take a *gorm.DB as an input and
+// return a *gorm.DB.
+func (m *model) ApplyScope(scope func(*gorm.DB) *gorm.DB) *model {
+	m.db = scope(m.db)
+	return m
+}
+
+// GroupBy applies the GROUP BY clause to the model's query using the given column
+// and returns a pointer to the model instance.
+func (m *model) GroupBy(column string) *model {
+	m.db = m.db.Group(column)
+	return m
+}
+
+// Having applies the HAVING clause to the model's query using the given query and
+// arguments, and returns a pointer to the model instance.
+func (m *model) Having(query interface{}, args ...interface{}) *model {
+	m.db = m.db.Having(query, args...)
+	return m
+}
+
+// Distinct retrieves distinct records from the model's query using the given columns
+// and returns a pointer to the model instance.
+func (m *model) Distinct(columns ...string) *model {
+	columnsInterface := make([]interface{}, len(columns))
+	for i, col := range columns {
+		columnsInterface[i] = col
+	}
+	m.db = m.db.Distinct(columnsInterface...)
+	return m
+}
+
+// UpdateColumn updates a single column in the model's query with the given value and
+// returns an error if any issues occur during the update operation. This method does
+// not trigger callbacks or validations.
+func (m *model) UpdateColumn(column string, value interface{}) error {
+	return m.db.UpdateColumn(column, value).Error
+}
+
+// UpdateColumns updates multiple columns in the model's query with the given values map
+// and returns an error if any issues occur during the update operation. This method does
+// not trigger callbacks or validations.
+func (m *model) UpdateColumns(values map[string]interface{}) error {
+	return m.db.UpdateColumns(values).Error
+}
+
+// Max finds the maximum value of the specified column for the records that match
+// the current query and stores the result in the given result interface. It returns
+// an error if any issues occur during the operation.
+func (m *model) Max(column string, result interface{}) error {
+	return m.db.Select("MAX(?) as max", column).Scan(result).Error
+}
+
+// Min finds the minimum value of the specified column for the records that match
+// the current query and stores the result in the given result interface. It returns
+// an error if any issues occur during the operation.
+func (m *model) Min(column string, result interface{}) error {
+	return m.db.Select("MIN(?) as min", column).Scan(result).Error
 }
