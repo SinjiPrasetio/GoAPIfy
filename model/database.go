@@ -258,3 +258,25 @@ func (m *model) Max(column string, result interface{}) error {
 func (m *model) Min(column string, result interface{}) error {
 	return m.db.Select("MIN(?) as min", column).Scan(result).Error
 }
+
+// WithCount retrieves the count of a related model using the specified relationship
+// and stores the result in the model's query. It returns a pointer to the model instance.
+func (m *model) WithCount(relation string) *model {
+	m.db = m.db.Joins(fmt.Sprintf("%s", relation)).Select(fmt.Sprintf("COUNT(%s.id) as %s_count", relation, relation)).Group(fmt.Sprintf("%s.id", relation))
+	return m
+}
+
+// WhereHas applies the specified query to a related model using the given relationship.
+// It takes in a relationship name, a query function, and returns a pointer to the model instance.
+func (m *model) WhereHas(relation string, query func(*gorm.DB) *gorm.DB) *model {
+	m.db = m.db.Joins(relation).Where(query)
+	return m
+}
+
+// OrWhereHas applies the specified query to a related model using the given relationship,
+// but adds an OR condition to the query.
+// It takes in a relationship name, a query function, and returns a pointer to the model instance.
+func (m *model) OrWhereHas(relation string, query func(*gorm.DB) *gorm.DB) *model {
+	m.db = m.db.Joins(relation).Or(query)
+	return m
+}
