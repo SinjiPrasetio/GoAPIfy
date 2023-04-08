@@ -61,9 +61,13 @@ func NewModel(db *gorm.DB) *model {
 // Load loads data into the specified model object.
 // It takes in a pointer to the model object, loads it into the model, and returns a pointer to the model object.
 // This method loads the specified model object into the current model, allowing it to be used for subsequent database operations.
-func (m *model) Load(model interface{}) *model {
-	m.tempData = model
-	return m
+func (m *model) Load(entity interface{}) *model {
+	// Create a new instance of model with the updated tempData
+	newModelInstance := &model{
+		db:       m.db,
+		tempData: entity,
+	}
+	return newModelInstance
 }
 
 // Find searches for a model with the specified ID and returns it.
