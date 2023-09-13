@@ -7,6 +7,7 @@ import (
 	"GoAPIfy/service/appService"
 	"GoAPIfy/service/auth"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -23,53 +24,67 @@ func Authentication(authService auth.AuthService, s appService.AppService) gin.H
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 
-		if !strings.Contains(authHeader, "Bearer") {
+		if !strings.HasPrefix(authHeader, "Bearer ") {
 			errorMessage := core.FormatError(errors.New("access denied : you're not authorized to call this api!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
 		}
 
-		// Split Bearer dan Token
-		tokenString := ""
-		arrayToken := strings.Split(authHeader, " ")
-		if len(arrayToken) == 2 {
-			tokenString = arrayToken[1]
-		}
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 
-		token, err := authService.ValidateToken(tokenString)
+		tokenData, err := authService.ValidateToken(tokenString)
 		if err != nil {
-			errorMessage := core.FormatError(errors.New("access denied : fail to validate token!"))
+			errorMessage := core.FormatError(err)
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			c.Abort()
+			return
 		}
 
-		claim, ok := token.Claims.(jwt.MapClaims)
+		// print raw claims
+		fmt.Printf("Raw claims: %+v\n", tokenData.Claims)
 
-		if !ok || !token.Valid {
-			errorMessage := core.FormatError(errors.New("access denied : token is not valid!"))
+		claimsPtr, ok := tokenData.Claims.(*jwt.MapClaims)
+		if !ok {
+			errorMessage := core.FormatError(errors.New("access denied : cannot extract token claims!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
 		}
 
-		userID := uint(claim["id"].(float64))
+		// Dereference the pointer to get the actual claims
+		claims := *claimsPtr
+
+		sub, ok := claims["sub"]
+		if !ok {
+			errorMessage := core.FormatError(errors.New("access denied : user claim is missing!"))
+			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
+		}
+
+		subFloat, ok := sub.(float64)
+		if !ok {
+			errorMessage := core.FormatError(errors.New("access denied : user claim is not a number!"))
+			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
+		}
+
+		userID := uint(subFloat)
 
 		var userModel model.User
-		result, err := s.Model.Load(userModel).Find(userID)
+		err = s.Model.Load(&userModel).Find(userID)
 		if err != nil {
 			errorMessage := core.FormatError(errors.New("access denied : user is unauthorized!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
 		}
-		userData, ok := result.(model.User)
-		if !ok {
-			errorMessage := core.FormatError(errors.New("access denied : user data corrupted!"))
+
+		if config.VerifyEmail() && userModel.VerifiedAt == nil {
+			errorMessage := core.FormatError(errors.New("access denied : user email is not verified!"))
 			core.SendResponse(c, http.StatusUnauthorized, errorMessage)
+			return
 		}
 
-		if config.VerifyEmail() {
-			if userData.VerifiedAt == nil {
-				errorMessage := core.FormatError(errors.New("access denied : user email is not verified!"))
-				core.SendResponse(c, http.StatusUnauthorized, errorMessage)
-			}
-		}
-
-		c.Set("currentUser", userData)
+		c.Set("currentUser", userModel)
+		c.Set("token", tokenString)
 		c.Next()
 	}
 }

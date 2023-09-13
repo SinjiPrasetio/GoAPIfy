@@ -21,3 +21,7 @@ type EmailVerificationInput struct {
 	Email             string `json:"email"`
 	VerificationToken string `json:"verification_token"`
 }
+
+type IsEmailAvailableInput struct {
+	Email string `json:"email" binding:"required"`
+}

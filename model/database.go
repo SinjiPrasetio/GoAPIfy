@@ -22,13 +22,21 @@ func AutoMigration(db *gorm.DB) error {
 // Model is the interface that must be implemented by models.
 // It defines the common methods that will be used across different models.
 type Model interface {
-	Find(id uint) (interface{}, error)
+	Find(id uint) error
 	Where(query interface{}, args ...interface{}) *model
+	Or(query interface{}, args ...interface{}) *model
 	Save() error
 	Delete() error
 	Load(model interface{}) *model
 	Count() (int64, error)
 	With(relation string) *model
+	Get() error
+	Order(value interface{}) *model
+	Debug() *model
+	Execute(sql string, values ...interface{}) error
+	Select(query interface{}, args ...interface{}) *model
+	Joins(query string, args ...interface{}) *model
+	WithCondition(relation string, args ...interface{}) *model
 }
 
 // model is the concrete type that implements the Model interface.
@@ -41,11 +49,11 @@ type model struct {
 
 // Pagination represents pagination information.
 type Pagination struct {
-	Records        interface{}
-	TotalRecords   int
-	TotalPages     int
-	CurrentPage    int
-	RecordsPerPage int
+	Records        interface{} `json:"records"`
+	TotalRecords   int         `json:"total_records"`
+	TotalPages     int         `json:"total_pages"`
+	CurrentPage    int         `json:"current_page"`
+	RecordsPerPage int         `json:"record_per_page"`
 }
 
 // NewModel creates a new instance of the model type with the specified database connection.
@@ -62,9 +70,10 @@ func NewModel(db *gorm.DB) *model {
 // It takes in a pointer to the model object, loads it into the model, and returns a pointer to the model object.
 // This method loads the specified model object into the current model, allowing it to be used for subsequent database operations.
 func (m *model) Load(entity interface{}) *model {
+
 	// Create a new instance of model with the updated tempData
 	newModelInstance := &model{
-		db:       m.db,
+		db:       m.db.Model(entity),
 		tempData: entity,
 	}
 	return newModelInstance
@@ -73,9 +82,9 @@ func (m *model) Load(entity interface{}) *model {
 // Find searches for a model with the specified ID and returns it.
 // It takes in a uint representing the ID to search for, and returns the found data and an error, if any.
 // If the data is found, the function returns the data with a nil error. If an error occurs, it returns an error object with the corresponding error message.
-func (m *model) Find(id uint) (interface{}, error) {
+func (m *model) Find(id uint) error {
 	err := m.db.First(m.tempData, id).Error
-	return m.tempData, err
+	return err
 }
 
 // Where applies the specified query to the model.
@@ -83,6 +92,24 @@ func (m *model) Find(id uint) (interface{}, error) {
 // This method applies the specified query to the current query on the model, with the specified arguments.
 func (m *model) Where(query interface{}, args ...interface{}) *model {
 	m.db = m.db.Where(query, args...)
+	return m
+}
+
+func (m *model) Debug() *model {
+	m.db = m.db.Debug()
+	return m
+}
+
+func (m *model) Select(query interface{}, args ...interface{}) *model {
+	m.db = m.db.Select(query, args...)
+	return m
+}
+
+// Or applies the specified query to the model.
+// It takes in a query interface and a variable number of arguments, and returns a pointer to the model object.
+// This method applies the specified query to the current query on the model, with the specified arguments.
+func (m *model) Or(query interface{}, args ...interface{}) *model {
+	m.db = m.db.Or(query, args...)
 	return m
 }
 
@@ -101,6 +128,29 @@ func (m *model) OrderBy(column string, mode string) *model {
 	order := fmt.Sprintf("%s %s", column, mode)
 	m.db = m.db.Order(order)
 	return m
+}
+
+func (m *model) Joins(query string, args ...interface{}) *model {
+	m.db = m.db.Joins(query, args)
+	return m
+}
+
+func (m *model) Order(value interface{}) *model {
+	m.db = m.db.Order(value)
+	return m
+}
+
+func (m *model) Raw(sql string, values ...interface{}) *model {
+	m.db = m.db.Raw(sql, values)
+	return m
+}
+
+func (m *model) Execute(sql string, values ...interface{}) error {
+	err := m.db.Exec(sql, values...).Error
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 // Limit specifies the maximum number of records to retrieve.
@@ -177,6 +227,11 @@ func (m *model) Save() error {
 // If an error occurs during the eager load, the function returns an error object with the corresponding error message. Otherwise, it returns nil.
 func (m *model) With(relation string) *model {
 	m.db = m.db.Preload(relation)
+	return m
+}
+
+func (m *model) WithCondition(relation string, args ...interface{}) *model {
+	m.db = m.db.Preload(relation, args...)
 	return m
 }
 
