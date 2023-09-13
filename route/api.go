@@ -18,7 +18,7 @@ import (
 // It registers the handlers and middleware required for the API, including authentication middleware,
 // rate limiting using the Ulule limiter library, and the necessary routes for the API endpoints.
 func API(server *gin.Engine, s appService.AppService) {
-	authService := auth.NewJWTService()
+	authService := auth.NewJWTService(s)
 
 	// Set up rate limiting
 	rateLimit := rate.NewLimiter()
